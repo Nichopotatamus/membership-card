@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppContextValue } from './AppContext';
+import firebase from 'firebase';
 
 type Props = {};
 
@@ -8,21 +9,22 @@ const DataFetcher: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     (async function fetchData() {
       setIsFetchingData(true);
-      const data = await fetch('https://qr-mockend.kink.no/user')
-        .then((response) => response.json())
-        .catch((error) => {
-          const cachedData = localStorage['cachedData'];
-          if (cachedData) {
-            return JSON.parse(cachedData);
-          } else {
-            alert('No cached data found');
-            throw error;
-          }
+      // @ts-ignore
+      const db = firebase.firestore(window.firebaseApp);
+      const data = await db
+        .collection('cards')
+        // @ts-ignore
+        .where('uid', "==", firebase.auth().currentUser.uid )
+        .get()
+        .then((querySnapshot) => {
+          const results: any[] = [];
+          querySnapshot.forEach((doc) => {
+            results.push({...doc.data(), id: doc.id});
+          });
+          return results;
         });
-      localStorage['cachedData'] = JSON.stringify(data);
-      localStorage['syncTimestamp'] = new Date();
       setIsFetchingData(false);
-      setData(data);
+      setData({cards: data});
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
