@@ -3,7 +3,11 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as functions from 'firebase-functions';
 import * as qrcode from 'qrcode';
+import * as jwt from 'jsonwebtoken';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
+
+// Will changed and  moved to environment variable in production
+const key = '4u7w!z%C*F-JaNdRgUkXp2s5v8y/A?D(G+KbPeShVmYq3t6w9z$C&E)H@McQfTjW';
 
 const db = functions.app.admin.firestore();
 // Start writing Firebase Functions
@@ -61,7 +65,7 @@ app.get('/clear', async (req, res) => {
     .catch(() => res.send('Failure!'));
 });
 
-type Subscription = { memberId: string; expiry: string; email: string; club: string };
+type Subscription = { alias: string; memberId: string; expiry: string; email: string; club: string };
 app.post('/subscriptions/:club', async (req, res) => {
   const subscriptions: Omit<Subscription, 'club'>[] = req.body;
   const addedIds: string[] = [];
@@ -81,13 +85,27 @@ app.post('/subscriptions/:club', async (req, res) => {
         .collection('subscriptions')
         .listDocuments()
         .then((results) =>
-          Promise.all(results.filter((result) => !addedIds.includes(result.id)).map((result) => result.delete()))
+          Promise.all(
+            results
+              .filter(async (result) => {
+                const data = await result.get().then((r) => r.data());
+                return data?.club === club && !addedIds.includes(result.id);
+              })
+              .map((result) => result.delete())
+          )
         );
       await db
         .collection('cards')
         .listDocuments()
         .then((results) =>
-          Promise.all(results.filter((result) => !addedIds.includes(result.id)).map((result) => result.delete()))
+          Promise.all(
+            results
+              .filter(async (result) => {
+                const data = await result.get().then((r) => r.data());
+                return data?.club === club && !addedIds.includes(result.id);
+              })
+              .map((result) => result.delete())
+          )
         );
       return res.send('Successfully!');
     })
@@ -104,16 +122,25 @@ export const createCard = functions
   .firestore.document('subscriptions/{docId}')
   .onWrite(async (snapshot, context) => {
     if (snapshot.after.data()) {
-      const subscription = <Subscription>snapshot.after.data()!;
+      const subscription = snapshot.after.data() as Subscription;
       await functions.app.admin
         .auth()
         .getUserByEmail(subscription.email)
         .then(async () => {
           const qr = await qrcode.toDataURL(
-            JSON.stringify({ memberId: subscription.memberId, expiry: subscription.expiry })
+            jwt.sign(
+              {
+                alias: subscription.alias,
+                memberId: subscription.memberId,
+                expiry: subscription.expiry,
+                club: subscription.club,
+              },
+              key
+            )
           );
           const cardId = `${subscription.club}-${subscription.memberId}`;
           const card = {
+            alias: subscription.alias,
             memberId: subscription.memberId,
             club: subscription.club,
             expiry: subscription.expiry,

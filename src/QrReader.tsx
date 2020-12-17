@@ -5,6 +5,7 @@ import MemberInfo from './MemberInfo';
 import { MemberData, QrData } from './types';
 import Status from './Status';
 import { Point } from 'jsqr/dist/locator';
+import jwt from 'jsonwebtoken';
 
 type Props = {};
 
@@ -121,7 +122,7 @@ const QrReader: React.FC<Props> = () => {
           drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, '#FF3B58');
 
           try {
-            const json = JSON.parse(code.data);
+            const json = jwt.decode(code.data) as QrData;
             setDisplay(json);
             console.log(json);
           } catch (error) {

@@ -1,21 +1,21 @@
 export type MemberData = {
-  cardNumber: string;
-  name: string;
+  memberId: string;
+  alias: string;
   expiry: string;
   club: string;
 };
 
 export type QrData = {
-  cardNumber: string;
-  name: string;
+  memberId: string;
+  alias: string;
   expiry: string;
   club: string;
 };
 
 export type Card = {
   id: string;
-  cardNumber: string;
-  name: string;
+  memberId: string;
+  alias: string;
   expiry: string;
   club: string;
   qr: string;
@@ -34,5 +34,6 @@ export type AppContext = {
 
 export type Data = {
   email?: string;
+  syncTimestamp?: Date;
   cards?: Card[];
 };

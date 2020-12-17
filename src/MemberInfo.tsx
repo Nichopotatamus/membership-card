@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/macro';
 import {MemberData} from "./types";
+import getClubName from "./getClubName";
 
 type Props = {
   memberData: MemberData;
@@ -18,10 +19,10 @@ const StyledInfo = styled.div`
 
 const MemberInfo: React.FC<Props> = ({ memberData }) => (
   <StyledInfo>
-    <div>{memberData.cardNumber}</div>
-    <div>{memberData.name}</div>
+    <div>{memberData.memberId}</div>
+    <div>{memberData.alias}</div>
     <div>{memberData.expiry}</div>
-    <div>{memberData.club}</div>
+    <div>{getClubName(memberData.club)}</div>
   </StyledInfo>
 );
 

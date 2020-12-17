@@ -6,7 +6,7 @@ import DataFetcher from './DataFetcher';
 
 import { createGlobalStyle } from 'styled-components/macro';
 import Menu from './Menu';
-import { AppContextProvider, useAppContextValue, AppContext } from './AppContext';
+import { AppContextProvider, AppContext } from './AppContext';
 import QrReader from './QrReader';
 import Login from './Login';
 
@@ -27,43 +27,36 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const App = () => {
-  const { data } = useAppContextValue();
-  return (
-    <BrowserRouter>
-      <AppContextProvider>
-        <GlobalStyle />
-        <DataFetcher />
-        <Navbar />
-        <AppContext.Consumer>
-          {({ isMenuActive }) =>
-            isMenuActive ? (
-              <Menu />
-            ) : (
-              <Switch>
-                <Route
-                  exact
-                  path="/"
-                  render={() => data.cards?.[0] && <Redirect to={`/cards/${data.cards[0].id}`} />}
-                />
-                <Route
-                  exact
-                  path="/cards/:cardId"
-                  render={({
-                    match: {
-                      params: { cardId },
-                    },
-                  }) => <Card cardId={cardId} />}
-                />
-                <Route exact path={'/qr-reader'} component={QrReader} />
-                <Route exact path={'/login'} component={Login} />
-              </Switch>
-            )
-          }
-        </AppContext.Consumer>
-      </AppContextProvider>
-    </BrowserRouter>
-  );
-};
+const App = () => (
+  <BrowserRouter>
+    <AppContextProvider>
+      <GlobalStyle />
+      <DataFetcher />
+      <Navbar />
+      <AppContext.Consumer>
+        {({ isMenuActive, data }) =>
+          isMenuActive ? (
+            <Menu />
+          ) : (
+            <Switch>
+              <Route exact path="/" render={() => data.cards?.[0] && <Redirect to={`/cards/${data.cards[0].id}`} />} />
+              <Route
+                exact
+                path="/cards/:cardId"
+                render={({
+                  match: {
+                    params: { cardId },
+                  },
+                }) => <Card cardId={cardId} />}
+              />
+              <Route exact path={'/qr-reader'} component={QrReader} />
+              <Route exact path={'/login'} component={Login} />
+            </Switch>
+          )
+        }
+      </AppContext.Consumer>
+    </AppContextProvider>
+  </BrowserRouter>
+);
 
 export default App;

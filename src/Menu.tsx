@@ -1,8 +1,9 @@
-import React from 'react';
-
+import React, { useMemo } from 'react';
+import firebase from 'firebase';
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
 import { useAppContextValue } from './AppContext';
+import getClubName from './getClubName';
 
 type Props = {};
 
@@ -43,18 +44,18 @@ const StyledLink = styled(Link)`
   color: white;
 `;
 
-const getSyncText = () => {
-  const syncTimestamp = localStorage['syncTimestamp'];
-  if (syncTimestamp) {
-    const date = new Date(syncTimestamp);
-    const split = date.toISOString().split('T');
-    return `${split[0]} ${split[1].split('.')[0]}`;
-  }
-  return 'Aldri';
-};
-
 const Menu: React.FC<Props> = () => {
-  const { isLoggedIn, setIsLoggedIn, data } = useAppContextValue();
+  const { isLoggedIn, data } = useAppContextValue();
+
+  const syncText = useMemo(() => {
+    if (data.syncTimestamp) {
+      const date = new Date(data.syncTimestamp);
+      const split = date.toISOString().split('T');
+      return `${split[0]} ${split[1].split('.')[0]}`;
+    }
+    return 'Aldri';
+  }, [data.syncTimestamp]);
+
   return (
     <StyledMenu>
       <div>
@@ -67,7 +68,7 @@ const Menu: React.FC<Props> = () => {
           </section>
           {data.cards?.map((card) => (
             <StyledLink key={card.id} to={`/cards/${card.id}`}>
-              {card.club}
+              {getClubName(card.club)}
             </StyledLink>
           ))}
         </StyledCardChooser>
@@ -77,7 +78,17 @@ const Menu: React.FC<Props> = () => {
 
       <div>
         {isLoggedIn ? (
-          <StyledLink to={'/login'} onClick={() => setIsLoggedIn(false)}>
+          <StyledLink
+            to={'/logout'}
+            onClick={() => {
+              firebase
+                .auth()
+                .signOut()
+                .then(() => {
+                  window.location.reload();
+                })
+                .catch(() => window.location.reload());
+            }}>
             Logg ut
           </StyledLink>
         ) : (
@@ -88,7 +99,7 @@ const Menu: React.FC<Props> = () => {
             <em>Sist synkronisert:</em>
           </span>
           <span>
-            <em>{getSyncText()}</em>
+            <em>{syncText}</em>
           </span>
         </div>
       </div>

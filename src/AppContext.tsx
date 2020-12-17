@@ -2,13 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext as AppContextType, Data } from './types';
 import { useLocation } from 'react-router-dom';
 
-const getCachedData = () => {
-  const cachedData = localStorage['cachedData'];
-  if (cachedData) {
-    return JSON.parse(cachedData);
-  }
-};
-
 export const AppContext = React.createContext<AppContextType>({
   isLoggedIn: true,
   setIsLoggedIn: () => {},
@@ -16,7 +9,7 @@ export const AppContext = React.createContext<AppContextType>({
   setIsFetchingData: () => {},
   isMenuActive: false,
   setIsMenuActive: () => {},
-  data: getCachedData() || {},
+  data: {},
   setData: () => {},
 });
 
