@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
 import { useAppContextValue } from './AppContext';
