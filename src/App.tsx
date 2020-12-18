@@ -9,6 +9,7 @@ import Menu from './Menu';
 import { AppContextProvider, AppContext } from './AppContext';
 import QrReader from './QrReader';
 import Login from './Login';
+import CacheBuster from "./CacheBuster";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -30,6 +31,7 @@ const GlobalStyle = createGlobalStyle`
 const App = () => (
   <BrowserRouter>
     <AppContextProvider>
+      <CacheBuster />
       <GlobalStyle />
       <DataFetcher />
       <Navbar />

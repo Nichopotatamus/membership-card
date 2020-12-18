@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import firebase from 'firebase/app';
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
@@ -47,15 +47,6 @@ const StyledLink = styled(Link)`
 const Menu: React.FC<Props> = () => {
   const { isLoggedIn, data } = useAppContextValue();
 
-  const syncText = useMemo(() => {
-    if (data.syncTimestamp) {
-      const date = new Date(data.syncTimestamp);
-      const split = date.toISOString().split('T');
-      return `${split[0]} ${split[1].split('.')[0]}`;
-    }
-    return 'Aldri';
-  }, [data.syncTimestamp]);
-
   return (
     <StyledMenu>
       <div>
@@ -99,7 +90,7 @@ const Menu: React.FC<Props> = () => {
             <em>Sist synkronisert:</em>
           </span>
           <span>
-            <em>{syncText}</em>
+            <em>{data.syncTimestamp ? data.syncTimestamp.toLocaleString() : 'Aldri'}</em>
           </span>
         </div>
       </div>

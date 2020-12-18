@@ -19,6 +19,9 @@ const DataFetcher: React.FC<Props> = ({ children }) => {
         .get()
         .then((querySnapshot) => {
           const syncTimestamp = querySnapshot.metadata.fromCache ? data.syncTimestamp : new Date();
+          if (syncTimestamp) {
+            localStorage['syncTimestamp'] = syncTimestamp;
+          }
           const cards = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Card[];
           return { syncTimestamp, cards };
         });

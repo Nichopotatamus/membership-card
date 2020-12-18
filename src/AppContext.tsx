@@ -2,6 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext as AppContextType, Data } from './types';
 import { useLocation } from 'react-router-dom';
 
+const getSyncTimestamp = () => {
+  if (localStorage['syncTimestamp']) {
+    try {
+      return new Date(localStorage['syncTimestamp']);
+    } catch {}
+  }
+};
+
 export const AppContext = React.createContext<AppContextType>({
   isLoggedIn: true,
   setIsLoggedIn: () => {},
@@ -17,7 +25,7 @@ export const AppContextProvider: React.FC = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [isMenuActive, setIsMenuActive] = useState(false);
-  const [data, setData] = useState<Data>({});
+  const [data, setData] = useState<Data>({ syncTimestamp: getSyncTimestamp() });
   const location = useLocation();
 
   useEffect(() => {
