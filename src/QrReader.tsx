@@ -59,9 +59,9 @@ const QrReader: React.FC<Props> = () => {
   const [status, setStatus] = useState<{ isValid: boolean; message: string } | undefined>();
   const [hasGetUserMediaError, setHasGetUserMediaError] = useState(false);
 
-  const setDisplay = (qrData: QrData) => {
+  const setDisplay = (qrData: QrData, validSignature: boolean) => {
     clearTimeout(timeout);
-    const status = checkMember(qrData);
+    const status = validSignature ? checkMember(qrData) : { isValid: false, message: 'invalidSignature' };
     setMemberData(qrData);
     setStatus(status);
     timeout = setTimeout(() => {
@@ -123,7 +123,15 @@ const QrReader: React.FC<Props> = () => {
 
           try {
             const json = jwt.decode(code.data) as QrData;
-            setDisplay(json);
+            let validSignature = false;
+            try {
+              jwt.verify(code.data, process.env.REACT_APP_JWT_PUBLIC_KEY as jwt.Secret);
+              validSignature = true;
+            } catch {
+              console.log('Invalid signature');
+            }
+
+            setDisplay(json, validSignature);
             console.log(json);
           } catch (error) {
             console.error('Could not parse JSON: ', code.data);
@@ -142,9 +150,7 @@ const QrReader: React.FC<Props> = () => {
       {hasGetUserMediaError ? (
         <StyledError>
           <p>Kunne ikke starte kamera. Sjekk at du har gitt tilgang og at du kjører en støttet nettleser.</p>
-          <p>
-            Støttede nettlesere:
-          </p>
+          <p>Støttede nettlesere:</p>
           <ul>
             <li>Safari 11, eller nyere (iOS)</li>
             <li>Chrome 52, Firefox 36, Opera 41, eller nyere (Android)</li>

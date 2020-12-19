@@ -6,9 +6,7 @@ import * as qrcode from 'qrcode';
 import * as jwt from 'jsonwebtoken';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
 
-// Will changed and  moved to environment variable in production
-const key = '4u7w!z%C*F-JaNdRgUkXp2s5v8y/A?D(G+KbPeShVmYq3t6w9z$C&E)H@McQfTjW';
-
+const region = 'europe-west3';
 const db = functions.app.admin.firestore();
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -115,10 +113,10 @@ app.post('/subscriptions/:club', async (req, res) => {
     });
 });
 
-export const api = functions.region('europe-west3').https.onRequest(app);
+export const api = functions.region(region).https.onRequest(app);
 
 export const createCard = functions
-  .region('europe-west3')
+  .region(region)
   .firestore.document('subscriptions/{docId}')
   .onWrite(async (snapshot, context) => {
     if (snapshot.after.data()) {
@@ -135,7 +133,20 @@ export const createCard = functions
                 expiry: subscription.expiry,
                 club: subscription.club,
               },
-              key
+              functions.config().createcard.privatekey,
+              { algorithm: 'RS256' }
+            )
+          );
+          console.log(
+            jwt.sign(
+              {
+                alias: subscription.alias,
+                memberId: subscription.memberId,
+                expiry: subscription.expiry,
+                club: subscription.club,
+              },
+              functions.config().createcard.privatekey,
+              { algorithm: 'RS256' }
             )
           );
           const cardId = `${subscription.club}-${subscription.memberId}`;
@@ -149,7 +160,8 @@ export const createCard = functions
           };
           await db.collection('cards').doc(cardId).set(card);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log(error);
           // Do nothing when there is no user
         });
     }
@@ -157,7 +169,7 @@ export const createCard = functions
   });
 
 /*
-export const helloWorld = functions.region('europe-west3').https.onRequest((request, response) => {
+export const helloWorld = functions.region(region).https.onRequest((request, response) => {
   functions.logger.info('Hello logs!', { structuredData: true });
   functions.app.admin
     .auth()
@@ -166,7 +178,7 @@ export const helloWorld = functions.region('europe-west3').https.onRequest((requ
     .catch(() => response.send('Failure!'));
 });
 
-exports.sendWelcomeEmail = functions.region('europe-west3').auth.user().onCreate((user) => {
+exports.sendWelcomeEmail = functions.region(region).auth.user().onCreate((user) => {
   console.log('My function that logs a created user', user.displayName);
 });
 */

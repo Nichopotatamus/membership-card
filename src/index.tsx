@@ -22,6 +22,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+if (window.location.hostname === 'localhost') {
+  firebase.firestore().useEmulator('localhost', 8080);
+}
+
 firebase
   .firestore()
   .enablePersistence()
