@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (c497b03c, 2020-09-10)"
+   sodipodi:docname="icon.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.48947955"
+     inkscape:cx="904.77916"
+     inkscape:cy="568.72743"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1395"
+     inkscape:window-x="2559"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke-width:0.251586"
+       id="rect904"
+       width="146.48639"
+       height="146.48639"
+       x="38.21912"
+       y="51.499161"
+       inkscape:export-filename="/Users/nicpauli/Playground/membership-card/public/logo192.png"
+       inkscape:export-xdpi="33.290001"
+       inkscape:export-ydpi="33.290001" />
+    <path
+       sodipodi:type="star"
+       style="fill:#990000;stroke-width:0.264583;fill-opacity:1"
+       id="path32"
+       sodipodi:sides="3"
+       sodipodi:cx="110.36591"
+       sodipodi:cy="92.114922"
+       sodipodi:r1="14.740562"
+       sodipodi:r2="7.3702807"
+       sodipodi:arg1="1.5707963"
+       sodipodi:arg2="2.6179939"
+       inkscape:flatsided="true"
+       inkscape:rounded="1"
+       inkscape:randomized="0"
+       d="m 110.36591,106.85548 c -25.531399,0 -25.531399,0 -12.765698,-22.110839 12.765698,-22.110844 12.765698,-22.110844 25.531398,-10e-7 12.76571,22.11084 12.76571,22.11084 -12.7657,22.11084 z"
+       inkscape:transform-center-y="-3.9122976"
+       transform="matrix(1.2695107,0,0,0.84931296,-28.749111,10.271056)"
+       inkscape:transform-center-x="-4.4368305e-06"
+       inkscape:export-filename="/Users/nicpauli/Playground/membership-card/public/logo192.png"
+       inkscape:export-xdpi="33.290001"
+       inkscape:export-ydpi="33.290001" />
+    <a
+       id="a76"
+       style="fill:#990000;fill-opacity:1"
+       inkscape:export-filename="/Users/nicpauli/Playground/membership-card/public/logo192.png"
+       inkscape:export-xdpi="33.290001"
+       inkscape:export-ydpi="33.290001">
+      <path
+         sodipodi:type="star"
+         style="fill:#990000;stroke-width:0.264583;fill-opacity:1"
+         id="path32-1"
+         sodipodi:sides="3"
+         sodipodi:cx="110.36591"
+         sodipodi:cy="92.114922"
+         sodipodi:r1="14.740562"
+         sodipodi:r2="7.3702807"
+         sodipodi:arg1="1.5707963"
+         sodipodi:arg2="2.6179939"
+         inkscape:flatsided="true"
+         inkscape:rounded="1"
+         inkscape:randomized="0"
+         d="m 110.36591,106.85548 c -25.531399,0 -25.531399,0 -12.765698,-22.110839 12.765698,-22.110844 12.765698,-22.110844 25.531398,-10e-7 12.76571,22.11084 12.76571,22.11084 -12.7657,22.11084 z"
+         inkscape:transform-center-y="-5.1927558"
+         transform="matrix(1.6444855,0,0,1.1272845,-70.269248,10.192856)"
+         inkscape:transform-center-x="-2.8409293e-06" />
+    </a>
+    <path
+       sodipodi:type="star"
+       style="fill:#990000;stroke-width:0.264583;fill-opacity:1"
+       id="path32-1-4"
+       sodipodi:sides="3"
+       sodipodi:cx="110.36591"
+       sodipodi:cy="92.114922"
+       sodipodi:r1="14.740562"
+       sodipodi:r2="7.3702807"
+       sodipodi:arg1="1.5707963"
+       sodipodi:arg2="2.6179939"
+       inkscape:flatsided="true"
+       inkscape:rounded="1"
+       inkscape:randomized="0"
+       d="m 110.36591,106.85548 c -25.531399,0 -25.531399,0 -12.765698,-22.110839 12.765698,-22.110844 12.765698,-22.110844 25.531398,-10e-7 12.76571,22.11084 12.76571,22.11084 -12.7657,22.11084 z"
+       inkscape:transform-center-y="-5.8632885"
+       transform="matrix(2.0556024,0,0,1.2728484,-115.73087,28.486594)"
+       inkscape:transform-center-x="3.8666281e-06"
+       inkscape:export-filename="/Users/nicpauli/Playground/membership-card/public/logo192.png"
+       inkscape:export-xdpi="33.290001"
+       inkscape:export-ydpi="33.290001" />
+    <rect
+       style="fill:#990000;stroke-width:0.260486;fill-opacity:1"
+       id="rect72"
+       width="11.855173"
+       height="19.875418"
+       x="105.25418"
+       y="161.52472"
+       rx="0.96927124"
+       inkscape:export-filename="/Users/nicpauli/Playground/membership-card/public/logo192.png"
+       inkscape:export-xdpi="33.290001"
+       inkscape:export-ydpi="33.290001" />
+  </g>
+</svg>

@@ -5,9 +5,8 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 import firebase from 'firebase/app';
+import 'firebase/auth';
 import 'firebase/firestore';
-import * as firebaseui from 'firebaseui';
-import 'firebaseui/dist/firebaseui.css';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -43,23 +42,12 @@ firebase
     }
   });
 
-firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    // User is signed in.
-    ReactDOM.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-      document.getElementById('root')
-    );
-  } else {
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    ui.start('#firebaseui-auth-container', {
-      signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
-      signInSuccessUrl: '/',
-    });
-  }
-});
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

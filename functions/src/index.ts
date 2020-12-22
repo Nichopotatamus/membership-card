@@ -4,6 +4,7 @@ import * as bodyParser from 'body-parser';
 import * as functions from 'firebase-functions';
 import * as qrcode from 'qrcode';
 import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcryptjs';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
 
 const region = 'europe-west3';
@@ -16,95 +17,55 @@ app.use(cors({ origin: true }));
 app.use(bodyParser.json());
 app.use(validateFirebaseIdToken(functions));
 
-app.get('/user/cards', async (req, res) => {
-  await db
-    .collection('cards')
-    .where('email', '==', res.locals.user.email)
-    .get()
-    .then((querySnapshot) => res.send(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))))
-    .catch((error) => res.send('Something borked.'));
-});
-
 app.get('/cards', async (req, res) => {
   await db
     .collection('cards')
     .get()
-    .then((querySnapshot) => res.send(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))))
-    .catch((error) => res.send('Something borked.'));
-});
-
-app.get('/subscriptions', async (req, res) => {
-  await db
-    .collection('subscriptions')
-    .get()
-    .then((querySnapshot) => res.send(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))))
-    .catch((error) => res.send('Something borked.'));
-});
-
-app.get('/users', async (req, res) => {
-  await functions.app.admin
-    .auth()
-    .getUsers([{ email: 'nicholas@paulik.no' }])
-    .then((getUsersResult) => res.send(getUsersResult.users));
-});
-
-app.get('/clear', async (req, res) => {
-  await Promise.all([
-    db
-      .collection('subscriptions')
-      .listDocuments()
-      .then((results) => results.map((result) => result.delete())),
-    db
-      .collection('cards')
-      .listDocuments()
-      .then((results) => results.map((result) => result.delete())),
-  ])
-    .then(() => res.send('Success!'))
-    .catch(() => res.send('Failure!'));
+    .then((querySnapshot) => res.send(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))));
 });
 
 type Subscription = { alias: string; memberId: string; expiry: string; email: string; club: string };
-app.post('/subscriptions/:club', async (req, res) => {
-  const subscriptions: Omit<Subscription, 'club'>[] = req.body;
-  const addedIds: string[] = [];
+app.put('/subscriptions/:club', async (req, res) => {
   const club = req.params.club;
+  const subscriptions: Subscription[] = req.body.map((entry: Omit<Subscription, 'club'>) => ({ ...entry, club }));
   await Promise.all(
     subscriptions.map((subscription) => {
       const subscriptionId = `${club}-${subscription.memberId}`;
-      addedIds.push(subscriptionId);
+      const { email, ...subscriptionWithoutEmail } = subscription;
       return db
         .collection('subscriptions')
         .doc(subscriptionId)
-        .set({ ...subscription, club });
+        .set(subscriptionWithoutEmail)
+        .then(async () => {
+          const uid = await db
+            .collection('users')
+            .where(`memberIds.${subscription.club}`, '==', `${subscription.memberId}`)
+            .get()
+            .then((querySnapshot) => {
+              if (querySnapshot.size === 1) {
+                return querySnapshot.docs[0].id;
+              }
+              return;
+            });
+          const existingUser = uid && await functions.app.admin
+            .auth()
+            .getUser(uid)
+            .catch(() => undefined);
+          if (existingUser) {
+            await createCard(existingUser.uid, subscription);
+          } else {
+            const token = jwt.sign(
+              { club: subscription.club, memberId: subscription.memberId },
+              functions.config().createcard.privatekey,
+              { algorithm: 'RS256' }
+            );
+            // Send this link in an e-mail
+            console.log(subscription.alias, `${functions.config().client.host}/signup?token=${token}&email=${subscription.email}`);
+          }
+        });
     })
   )
     .then(async () => {
-      await db
-        .collection('subscriptions')
-        .listDocuments()
-        .then((results) =>
-          Promise.all(
-            results
-              .filter(async (result) => {
-                const data = await result.get().then((r) => r.data());
-                return data?.club === club && !addedIds.includes(result.id);
-              })
-              .map((result) => result.delete())
-          )
-        );
-      await db
-        .collection('cards')
-        .listDocuments()
-        .then((results) =>
-          Promise.all(
-            results
-              .filter(async (result) => {
-                const data = await result.get().then((r) => r.data());
-                return data?.club === club && !addedIds.includes(result.id);
-              })
-              .map((result) => result.delete())
-          )
-        );
       return res.send('Successfully!');
     })
     .catch((error) => {
@@ -115,70 +76,104 @@ app.post('/subscriptions/:club', async (req, res) => {
 
 export const api = functions.region(region).https.onRequest(app);
 
-export const createCard = functions
-  .region(region)
-  .firestore.document('subscriptions/{docId}')
-  .onWrite(async (snapshot, context) => {
-    if (snapshot.after.data()) {
-      const subscription = snapshot.after.data() as Subscription;
-      await functions.app.admin
-        .auth()
-        .getUserByEmail(subscription.email)
-        .then(async () => {
-          const qr = await qrcode.toDataURL(
-            jwt.sign(
-              {
-                alias: subscription.alias,
-                memberId: subscription.memberId,
-                expiry: subscription.expiry,
-                club: subscription.club,
-              },
-              functions.config().createcard.privatekey,
-              { algorithm: 'RS256' }
-            )
-          );
-          console.log(
-            jwt.sign(
-              {
-                alias: subscription.alias,
-                memberId: subscription.memberId,
-                expiry: subscription.expiry,
-                club: subscription.club,
-              },
-              functions.config().createcard.privatekey,
-              { algorithm: 'RS256' }
-            )
-          );
-          const cardId = `${subscription.club}-${subscription.memberId}`;
-          const card = {
-            alias: subscription.alias,
-            memberId: subscription.memberId,
-            club: subscription.club,
-            expiry: subscription.expiry,
-            email: subscription.email,
-            qr,
-          };
-          await db.collection('cards').doc(cardId).set(card);
-        })
-        .catch((error) => {
-          console.log(error);
-          // Do nothing when there is no user
-        });
+const createCard = async (uid: string, subscription: Subscription) => {
+  const payload = {
+    alias: subscription.alias,
+    memberId: subscription.memberId,
+    expiry: subscription.expiry,
+    club: subscription.club,
+  };
+  const qr = await qrcode.toDataURL(
+    jwt.sign(payload, functions.config().createcard.privatekey, { algorithm: 'RS256' })
+  );
+  const cardId = `${subscription.club}-${subscription.memberId}`;
+  const card = {
+    ...payload,
+    uid,
+    qr,
+  };
+  await db.collection('cards').doc(cardId).set(card);
+};
+
+const getRealOrFakeEmail = (username: string) =>
+  username.match(/^\S+@\S+$/) ? username : `${username}@skog-og-mark.kink.no`;
+
+export const signup = functions.region(region).https.onRequest(async (request, response) =>
+  cors({ origin: true })(request, response, async () => {
+    if (request.method !== 'POST') {
+      response.sendStatus(405);
+      return;
     }
-    return snapshot;
-  });
+    const { username, password, token } = request.body;
+    const realOrFakeEmail = getRealOrFakeEmail(username);
+    try {
+      jwt.verify(token, functions.config().createcard.privatekey, { algorithms: ['RS256'] });
+    } catch {
+      response.sendStatus(400);
+      return;
+    }
+    const existingUser = await functions.app.admin
+      .auth()
+      .getUserByEmail(realOrFakeEmail)
+      .catch(() => undefined);
+    if (existingUser) {
+      response.sendStatus(409);
+      return;
+    }
+    const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
+    await functions.app.admin.auth().createUser({ uid: username, email: realOrFakeEmail, password });
+    await db
+      .collection('users')
+      .doc(username)
+      .set({ username, memberIds: { [club]: memberId } });
 
-/*
-export const helloWorld = functions.region(region).https.onRequest((request, response) => {
-  functions.logger.info('Hello logs!', { structuredData: true });
-  functions.app.admin
-    .auth()
-    .createUser({ email: 'test123@example.com' })
-    .then(() => response.send('Success!'))
-    .catch(() => response.send('Failure!'));
-});
+    await db
+      .collection('subscriptions')
+      .where('club', '==', club)
+      .where('memberId', '==', memberId)
+      .get()
+      .then(async (querySnapshot) => {
+        await Promise.all(
+          querySnapshot.docs
+            .map((doc) => doc.data() as Subscription)
+            .map((subscription) => createCard(username, subscription))
+        );
+      });
+    response.send('Success!');
+  })
+);
 
-exports.sendWelcomeEmail = functions.region(region).auth.user().onCreate((user) => {
-  console.log('My function that logs a created user', user.displayName);
+export const auth = functions.region(region).https.onRequest(async (request, response) =>
+  cors({ origin: true })(request, response, async () => {
+    if (request.method !== 'POST') {
+      response.sendStatus(405);
+      return;
+    }
+    const { username, password } = request.body;
+    if (!username || !password) {
+      response.sendStatus(400);
+      return;
+    }
+    const user = await db
+      .collection('users')
+      .doc(username)
+      .get()
+      .then((userDocument) => (userDocument.exists ? userDocument.data() : undefined));
+    if (user) {
+      const result = await bcrypt.compare(password, user.hash);
+      if (result) {
+        const token = await functions.app.admin.auth().createCustomToken(username);
+        response.status(200).send({ token, user: { uid: username, memberIds: user.memberIds } });
+      } else {
+        response.sendStatus(401);
+      }
+    } else {
+      response.sendStatus(401);
+    }
+  })
+);
+
+export const onDeleteUser = functions.auth.user().onDelete(async (user) => {
+  await db.collection('users').doc(user.uid).delete().catch(() => {})
+  return user;
 });
-*/

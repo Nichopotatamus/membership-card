@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext as AppContextType, Data } from './types';
 import { useLocation } from 'react-router-dom';
+import firebase from "firebase/app";
 
 const getSyncTimestamp = () => {
   if (localStorage['syncTimestamp']) {
@@ -11,8 +12,8 @@ const getSyncTimestamp = () => {
 };
 
 export const AppContext = React.createContext<AppContextType>({
-  isLoggedIn: true,
-  setIsLoggedIn: () => {},
+  user: null,
+  setUser: () => {},
   isFetchingData: false,
   setIsFetchingData: () => {},
   isMenuActive: false,
@@ -22,7 +23,7 @@ export const AppContext = React.createContext<AppContextType>({
 });
 
 export const AppContextProvider: React.FC = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [user, setUser] = useState<firebase.User | null>(null);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [data, setData] = useState<Data>({ syncTimestamp: getSyncTimestamp() });
@@ -35,8 +36,8 @@ export const AppContextProvider: React.FC = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        isLoggedIn,
-        setIsLoggedIn,
+        user,
+        setUser,
         isFetchingData,
         setIsFetchingData,
         data,

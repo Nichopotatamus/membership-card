@@ -6,16 +6,18 @@ import useInterval from './useInterval';
 
 type Props = {};
 const DataFetcher: React.FC<Props> = ({ children }) => {
-  const { data, setIsFetchingData, setData } = useAppContextValue();
+  const { data, setIsFetchingData, setData, user } = useAppContextValue();
   const counter = useInterval(60 * 1000);
-
   useEffect(() => {
+    if (!user) {
+      return;
+    }
     (async function fetchData() {
       setIsFetchingData(true);
       const db = firebase.firestore();
       const { syncTimestamp, cards } = await db
         .collection('cards')
-        .where('email', '==', firebase.auth().currentUser?.email)
+        .where('uid', '==', user.uid)
         .get()
         .then((querySnapshot) => {
           const syncTimestamp = querySnapshot.metadata.fromCache ? data.syncTimestamp : new Date();
@@ -28,7 +30,7 @@ const DataFetcher: React.FC<Props> = ({ children }) => {
       setIsFetchingData(false);
       setData({ syncTimestamp, cards });
     })();
-  }, [counter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, counter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 };

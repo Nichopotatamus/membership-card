@@ -1,3 +1,5 @@
+import firebase from 'firebase/app';
+
 export type MemberData = {
   memberId: string;
   alias: string;
@@ -22,8 +24,8 @@ export type Card = {
 };
 
 export type AppContext = {
-  isLoggedIn: boolean;
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
+  user: firebase.User | null;
+  setUser: (user: firebase.User | null) => void;
   isFetchingData: boolean;
   setIsFetchingData: (isFetchingData: boolean) => void;
   isMenuActive: boolean;

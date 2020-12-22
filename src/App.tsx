@@ -10,6 +10,8 @@ import { AppContextProvider, AppContext } from './AppContext';
 import QrReader from './QrReader';
 import Login from './Login';
 import CacheBuster from "./CacheBuster";
+import AuthState from "./AuthState";
+import SignUp from "./SignUp";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -31,6 +33,7 @@ const GlobalStyle = createGlobalStyle`
 const App = () => (
   <BrowserRouter>
     <AppContextProvider>
+      <AuthState />
       <CacheBuster />
       <GlobalStyle />
       <DataFetcher />
@@ -53,6 +56,7 @@ const App = () => (
               />
               <Route exact path={'/qr-reader'} component={QrReader} />
               <Route exact path={'/login'} component={Login} />
+              <Route exact path={'/signup'} component={SignUp} />
             </Switch>
           )
         }

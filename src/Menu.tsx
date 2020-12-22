@@ -45,14 +45,14 @@ const StyledLink = styled(Link)`
 `;
 
 const Menu: React.FC<Props> = () => {
-  const { isLoggedIn, data } = useAppContextValue();
+  const { user, data } = useAppContextValue();
 
   return (
     <StyledMenu>
       <div>
         <StyledLink to="/qr-reader">Les av QR-koder</StyledLink>
       </div>
-      {isLoggedIn ? (
+      {user ? (
         <StyledCardChooser>
           <section>
             <strong>Velg kort:</strong>
@@ -68,7 +68,7 @@ const Menu: React.FC<Props> = () => {
       )}
 
       <div>
-        {isLoggedIn ? (
+        {user ? (
           <StyledLink
             to={'/logout'}
             onClick={() => {

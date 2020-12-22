@@ -1,11 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import styled from 'styled-components/macro';
 import Button from './Button';
 import { gray1, gray3, kinkRed } from './stylingVariables';
 import firebase from 'firebase/app';
-import getRealOrFakeEmail from "./getRealOrFakeEmail";
+import getRealOrFakeEmail from './getRealOrFakeEmail';
+import { useHistory } from 'react-router-dom';
+import qs from 'qs';
 
-const StyledLogin = styled.div`
+const StyledSignUp = styled.div`
   flex: 1;
   width: 100%;
   display: flex;
@@ -63,7 +65,7 @@ const StyledLabel = styled.label`
   margin-bottom: 5px;
 `;
 
-const StyledLoginError = styled.p`
+const StyledSignUpError = styled.p`
   color: red;
   margin-bottom: 5px;
 `;
@@ -74,31 +76,40 @@ const StyledFieldContainer = styled.div`
   flex-direction: column;
 `;
 
-const Login = () => {
+const SignUp = () => {
+  const { location } = useHistory();
+  const { email, token } = useMemo(() => {
+    return qs.parse(location.search, { ignoreQueryPrefix: true, }) as {[key: string]: string};
+  }, [location.search]);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement>(null);
   const error = [''][0];
 
   return (
-    <StyledLogin>
-      <StyledForm action="/login" method="post">
-        <h1>Login</h1>
+    <StyledSignUp>
+      <StyledForm action="/signup" method="post">
+        <h1>SignUp</h1>
         <StyledFieldContainer>
           <StyledLabel>Brukernavn</StyledLabel>
-          <input ref={usernameRef} type="text" placeholder="Brukernavn" name="username" />
+          <input ref={usernameRef} defaultValue={email} type="text" placeholder="Brukernavn" name="username" />
         </StyledFieldContainer>
         <StyledFieldContainer>
           <StyledLabel>Passord</StyledLabel>
           <input ref={passwordRef} type="password" placeholder="Passord" name="password" />
         </StyledFieldContainer>
-        {error === 'invalidLogin' && (
+        <StyledFieldContainer>
+          <StyledLabel>Bekreft passord</StyledLabel>
+          <input ref={confirmPasswordRef} type="password" placeholder="Bekreft passord" name="confirm-password" />
+        </StyledFieldContainer>
+        {error === 'invalidSignUp' && (
           <div>
-            <StyledLoginError>Wrong username and/or password</StyledLoginError>
+            <StyledSignUpError>Wrong username and/or password</StyledSignUpError>
           </div>
         )}
         {error === 'notLoggedIn' && (
           <div>
-            <StyledLoginError>Log in to continue</StyledLoginError>
+            <StyledSignUpError>Log in to continue</StyledSignUpError>
           </div>
         )}
         <div>
@@ -106,16 +117,22 @@ const Login = () => {
             onClick={async () => {
               const username = usernameRef.current?.value;
               const password = passwordRef.current?.value;
-              if(username && password) {
+              const confirmPassword = passwordRef.current?.value;
+              if (username && password && password === confirmPassword) {
+                await fetch(`${process.env.REACT_APP_CLOUD_FUNCTIONS_HOST}/signup`, {
+                  method: 'POST',
+                  body: JSON.stringify({ username, password, token }),
+                  headers: { 'content-type': 'application/json' },
+                });
                 await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
               }
             }}
-            text="Log in"
+            text="Sign up"
           />
         </div>
       </StyledForm>
-    </StyledLogin>
+    </StyledSignUp>
   );
 };
 
-export default Login;
+export default SignUp;
