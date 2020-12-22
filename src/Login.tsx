@@ -111,7 +111,7 @@ const Login = () => {
           </div>
         )}
         <div>
-          <Button onClick={onSubmit} text="Logg in" />
+          <Button onClick={onSubmit} text="Logg inn" />
           <button style={{display: 'none'}} type="submit" onClick={onSubmit} />
         </div>
       </StyledForm>
