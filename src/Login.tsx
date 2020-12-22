@@ -3,7 +3,7 @@ import styled from 'styled-components/macro';
 import Button from './Button';
 import { gray1, gray3, kinkRed } from './stylingVariables';
 import firebase from 'firebase/app';
-import getRealOrFakeEmail from "./getRealOrFakeEmail";
+import getRealOrFakeEmail from './getRealOrFakeEmail';
 
 const StyledLogin = styled.div`
   flex: 1;
@@ -79,10 +79,19 @@ const Login = () => {
   const passwordRef = useRef<HTMLInputElement>(null);
   const error = [''][0];
 
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const username = usernameRef.current?.value;
+    const password = passwordRef.current?.value;
+    if (username && password) {
+      await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password);
+    }
+  };
+
   return (
     <StyledLogin>
-      <StyledForm action="/login" method="post">
-        <h1>Login</h1>
+      <StyledForm onSubmit={onSubmit}>
+        <h1>Logg inn</h1>
         <StyledFieldContainer>
           <StyledLabel>Brukernavn</StyledLabel>
           <input ref={usernameRef} type="text" placeholder="Brukernavn" name="username" />
@@ -102,16 +111,8 @@ const Login = () => {
           </div>
         )}
         <div>
-          <Button
-            onClick={async () => {
-              const username = usernameRef.current?.value;
-              const password = passwordRef.current?.value;
-              if(username && password) {
-                await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
-              }
-            }}
-            text="Log in"
-          />
+          <Button onClick={onSubmit} text="Logg in" />
+          <button style={{display: 'none'}} type="submit" onClick={onSubmit} />
         </div>
       </StyledForm>
     </StyledLogin>
