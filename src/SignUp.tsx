@@ -89,7 +89,7 @@ const SignUp = () => {
   return (
     <StyledSignUp>
       <StyledForm action="/signup" method="post">
-        <h1>SignUp</h1>
+        <h1>Registrer ny bruker</h1>
         <StyledFieldContainer>
           <StyledLabel>Brukernavn</StyledLabel>
           <input ref={usernameRef} defaultValue={email} type="text" placeholder="Brukernavn" name="username" />
@@ -127,7 +127,7 @@ const SignUp = () => {
                 await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
               }
             }}
-            text="Sign up"
+            text="Registrer"
           />
         </div>
       </StyledForm>
