@@ -1,8 +1,9 @@
-import * as validate from 'validate.js';
-import * as moment from 'moment';
-import * as qrcode from 'qrcode';
-import * as jwt from 'jsonwebtoken';
 import * as functions from 'firebase-functions';
+import validate from 'validate.js';
+import moment from 'moment';
+import qrcode from 'qrcode';
+import jwt from 'jsonwebtoken';
+
 const db = functions.app.admin.firestore();
 
 export type Subscription = {

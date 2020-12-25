@@ -1,8 +1,8 @@
-import * as express from 'express';
-import * as cors from 'cors';
-import * as bodyParser from 'body-parser';
 import * as functions from 'firebase-functions';
-import * as jwt from 'jsonwebtoken';
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
 import {
   fromBase64,
