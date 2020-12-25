@@ -10,10 +10,10 @@ import {
   getRealOrFakeEmail,
   getUsername,
   validateSubscriptionsBody,
-  Subscription,
   createCard,
   getExistingUser,
   parseSubscriptionsBody,
+  linkSubscriptions,
 } from './utils';
 
 const region = 'europe-west3';
@@ -113,20 +113,47 @@ app.post('/signup', async (req, res) => {
     .collection('users')
     .doc(newUser.uid)
     .set({ username, memberIds: { [club]: memberId } });
-
-  await db
-    .collection('subscriptions')
-    .where('club', '==', club)
-    .where('memberId', '==', memberId)
-    .get()
-    .then(async (querySnapshot) => {
-      await Promise.all(
-        querySnapshot.docs
-          .map((doc) => doc.data() as Subscription)
-          .map((subscription) => createCard(newUser.uid, subscription))
-      );
-    });
+  await linkSubscriptions(newUser.uid, memberId, club);
   res.send({ message: 'Success!' });
+});
+
+app.post('/link', validateFirebaseIdToken(functions), async (req, res) => {
+  // TODO: Clean up and type better.
+  const uid: string = res.locals.user.uid;
+  const { token } = req.body;
+  try {
+    jwt.verify(token, fromBase64(functions.config().createcard.publickey), { algorithms: ['RS256'] });
+  } catch {
+    res.status(400).send(errorResponse('signup/invalid-token', 'The provided token is not valid.'));
+    return;
+  }
+  const user = await functions.app.admin
+    .auth()
+    .getUser(uid)
+    .catch(() => undefined);
+  if (!user) {
+    res.status(400).send(errorResponse('signup/invalid-user', 'The user could not be found in our system.'));
+    return;
+  }
+  const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
+  try {
+    const userDocument = await db
+      .collection('users')
+      .doc(user.uid)
+      .get()
+      .then((doc) => doc.data());
+    await db
+      .collection('users')
+      .doc(user.uid)
+      .set({
+        ...userDocument,
+        memberIds: { ...userDocument!.memberIds, [club]: memberId },
+      });
+    await linkSubscriptions(user.uid, memberId, club);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).send(errorResponse(error.code, error.message));
+  }
 });
 
 export const api = functions.region(region).https.onRequest(app);
@@ -135,10 +162,16 @@ export const onDeleteUser = functions
   .region(region)
   .auth.user()
   .onDelete(async (user) => {
+    // TODO: Clean up and make more resilient to errors.
     await db
       .collection('users')
       .doc(user.uid)
       .delete()
       .catch(() => undefined);
+    await db
+      .collection('cards')
+      .where('uid', '==', user.uid)
+      .get()
+      .then((querySnapshot) => querySnapshot.forEach(async (doc) => await doc.ref.delete()));
     return user;
   });

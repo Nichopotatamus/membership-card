@@ -15,12 +15,31 @@ export type Subscription = {
 
 export const fromBase64 = (input: string) => Buffer.from(input, 'base64').toString('utf8');
 
-export const errorResponse = (code: string, message: string, metadata?: any) => ({ code, message, metadata });
+export const errorResponse = (code: string = 'unknown', message: string, metadata?: any) => ({
+  code,
+  message,
+  metadata,
+});
 
 export const getRealOrFakeEmail = (username: string) =>
   username.match(/^\S+@\S+$/) ? username : `${username}@skog-og-mark.kink.no`;
 
 export const getUsername = (realOrFakeEmail: string) => realOrFakeEmail.replace('@skog-og-mark.kink.no', '');
+
+export const linkSubscriptions = async (uid: string, memberId: string, club: string) => {
+  return await db
+    .collection('subscriptions')
+    .where('club', '==', club)
+    .where('memberId', '==', memberId)
+    .get()
+    .then(async (querySnapshot) => {
+      await Promise.all(
+        querySnapshot.docs
+          .map((doc) => doc.data() as Subscription)
+          .map((subscription) => createCard(uid, subscription))
+      );
+    });
+};
 
 export const getExistingUser = async (memberId: string, club: string) => {
   const uid = await db
