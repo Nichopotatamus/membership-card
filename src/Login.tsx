@@ -4,7 +4,7 @@ import Button from './Button';
 import { gray1, gray3, kinkRed } from './stylingVariables';
 import firebase from 'firebase/app';
 import getRealOrFakeEmail from './getRealOrFakeEmail';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 const StyledLogin = styled.div`
   flex: 1;
@@ -12,6 +12,8 @@ const StyledLogin = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  padding-bottom: 32px;
 
   input::placeholder {
     color: ${gray1};
@@ -75,6 +77,11 @@ const StyledFieldContainer = styled.div`
   flex-direction: column;
 `;
 
+const StyledLink = styled(Link)`
+  color: white;
+  font-size: 24px;
+`;
+
 const Login = () => {
   const history = useHistory();
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -126,6 +133,7 @@ const Login = () => {
           <button style={{ display: 'none' }} type="submit" onClick={onSubmit} />
         </div>
       </StyledForm>
+      <StyledLink to="/qr-reader">Les av QR-koder</StyledLink>
     </StyledLogin>
   );
 };
