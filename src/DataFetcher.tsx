@@ -4,33 +4,36 @@ import firebase from 'firebase/app';
 import { Card } from './types';
 import useInterval from './useInterval';
 
-type Props = {};
-const DataFetcher: React.FC<Props> = ({ children }) => {
-  const { data, setIsFetchingData, setData, user } = useAppContextValue();
+const DataFetcher: React.FC = () => {
+  const { setIsFetchingData, setData, user } = useAppContextValue();
   const counter = useInterval(60 * 1000);
+
   useEffect(() => {
     if (!user) {
+      setData({ cards: [] });
       return;
     }
     (async function fetchData() {
       setIsFetchingData(true);
       const db = firebase.firestore();
-      const { syncTimestamp, cards } = await db
+      const { fromCache, cards } = await db
         .collection('cards')
         .where('uid', '==', user.uid)
         .get()
-        .then((querySnapshot) => {
-          const syncTimestamp = querySnapshot.metadata.fromCache ? data.syncTimestamp : new Date();
-          if (syncTimestamp) {
-            localStorage['syncTimestamp'] = syncTimestamp;
-          }
-          const cards = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Card[];
-          return { syncTimestamp, cards };
-        });
+        .then((querySnapshot) => ({
+          fromCache: querySnapshot.metadata.fromCache,
+          cards: querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Card[],
+        }));
+      setData((previousData) => {
+        const syncTimestamp = fromCache ? previousData.syncTimestamp : new Date();
+        if (syncTimestamp) {
+          localStorage['syncTimestamp'] = syncTimestamp;
+        }
+        return { syncTimestamp, cards };
+      });
       setIsFetchingData(false);
-      setData({ syncTimestamp, cards });
     })();
-  }, [user, counter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, counter, setData, setIsFetchingData]);
 
   return null;
 };

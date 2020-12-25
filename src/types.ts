@@ -1,3 +1,4 @@
+import React from 'react';
 import firebase from 'firebase/app';
 
 export type MemberData = {
@@ -25,13 +26,13 @@ export type Card = {
 
 export type AppContext = {
   user: firebase.User | null;
-  setUser: (user: firebase.User | null) => void;
+  setUser: React.Dispatch<React.SetStateAction<firebase.User | null>>;
   isFetchingData: boolean;
-  setIsFetchingData: (isFetchingData: boolean) => void;
+  setIsFetchingData: React.Dispatch<React.SetStateAction<boolean>>;
   isMenuActive: boolean;
-  setIsMenuActive: (isMenuActive: boolean) => void;
+  setIsMenuActive: React.Dispatch<React.SetStateAction<boolean>>;
   data: Data;
-  setData: (data: Data) => void;
+  setData: React.Dispatch<React.SetStateAction<Data>>;
 };
 
 export type Data = {

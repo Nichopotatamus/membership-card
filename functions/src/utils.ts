@@ -1,5 +1,57 @@
 import * as validate from 'validate.js';
 import * as moment from 'moment';
+import * as qrcode from 'qrcode';
+import * as jwt from 'jsonwebtoken';
+import * as functions from 'firebase-functions';
+const db = functions.app.admin.firestore();
+
+export type Subscription = {
+  alias: string;
+  memberId: string;
+  expiry: string;
+  club: string;
+};
+
+export const fromBase64 = (input: string) => Buffer.from(input, 'base64').toString('utf8');
+
+export const errorResponse = (code: string, message: string, metadata?: any) => ({ code, message, metadata });
+
+export const getRealOrFakeEmail = (username: string) =>
+  username.match(/^\S+@\S+$/) ? username : `${username}@skog-og-mark.kink.no`;
+
+export const getUsername = (realOrFakeEmail: string) => realOrFakeEmail.replace('@skog-og-mark.kink.no', '');
+
+export const getExistingUser = async (memberId: string, club: string) => {
+  const uid = await db
+    .collection('users')
+    .where(`memberIds.${club}`, '==', `${memberId}`)
+    .get()
+    .then((querySnapshot) => (querySnapshot.size === 1 ? querySnapshot.docs[0].id : undefined));
+  const existingUser = await functions.app.admin
+    .auth()
+    .getUser(uid || '')
+    .catch(() => undefined);
+  return existingUser;
+};
+
+export const createCard = async (uid: string, subscription: Subscription) => {
+  const payload = {
+    alias: subscription.alias,
+    memberId: subscription.memberId,
+    expiry: subscription.expiry,
+    club: subscription.club,
+  };
+  const qr = await qrcode.toDataURL(
+    jwt.sign(payload, fromBase64(functions.config().createcard.privatekey), { algorithm: 'RS256' })
+  );
+  const cardId = `${subscription.club}-${subscription.memberId}`;
+  const card = {
+    ...payload,
+    uid,
+    qr,
+  };
+  return await db.collection('cards').doc(cardId).set(card);
+};
 
 validate.extend(validate.validators.datetime, {
   parse(value: any) {
@@ -61,11 +113,20 @@ export const validateSubscriptionsBody = (input: any) => {
   return;
 };
 
-export const fromBase64 = (input: string) => Buffer.from(input, 'base64').toString('utf8');
-
-export const errorResponse = (code: string, message: string, metadata?: any) => ({ code, message, metadata });
-
-export const getRealOrFakeEmail = (username: string) =>
-  username.match(/^\S+@\S+$/) ? username : `${username}@skog-og-mark.kink.no`;
-
-export const getUsername = (realOrFakeEmail: string) => realOrFakeEmail.replace('@skog-og-mark.kink.no', '');
+export const parseSubscriptionsBody = (
+  input: {
+    alias: string;
+    memberId: string;
+    expiry: string;
+    email: string;
+    sendSignUpEmail?: boolean;
+  }[],
+  club: string
+) => {
+  return input.map((entry) => {
+    const { email, sendSignUpEmail, ...rest } = entry;
+    const subscription: Subscription = { ...rest, club };
+    const subscriptionId = `${club}-${subscription.memberId}`;
+    return { subscriptionId, subscription, email, sendSignUpEmail };
+  });
+};

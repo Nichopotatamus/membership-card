@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
 import Button from './Button';
 import { gray1, gray3, kinkRed } from './stylingVariables';
@@ -79,40 +79,46 @@ const Login = () => {
   const history = useHistory();
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const error = [''][0];
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const username = usernameRef.current?.value;
-    const password = passwordRef.current?.value;
-    if (username && password) {
-      await firebase
-        .auth()
-        .signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
-        .then(() => history.push('/'));
-    }
+    setErrorCode(null);
+    const username = usernameRef.current?.value!;
+    const password = passwordRef.current?.value!;
+    await firebase
+      .auth()
+      .signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
+      .then(() => history.push('/'))
+      .catch((error) => {
+        console.error(error);
+        setErrorCode(error.code);
+      });
   };
+
+  const errorMessage = useMemo(() => {
+    if (errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-email') {
+      return 'Feil brukernavn/e-post og/eller passord';
+    } else if (errorCode) {
+      return 'En ukjent feil har oppstått, vennligst prøv på nytt';
+    }
+  }, [errorCode]);
 
   return (
     <StyledLogin>
       <StyledForm onSubmit={onSubmit}>
         <h1>Logg inn</h1>
         <StyledFieldContainer>
-          <StyledLabel>Brukernavn</StyledLabel>
+          <StyledLabel>Brukernavn/e-post</StyledLabel>
           <input ref={usernameRef} type="text" placeholder="Brukernavn" name="username" />
         </StyledFieldContainer>
         <StyledFieldContainer>
           <StyledLabel>Passord</StyledLabel>
           <input ref={passwordRef} type="password" placeholder="Passord" name="password" />
         </StyledFieldContainer>
-        {error === 'invalidLogin' && (
+        {errorCode && (
           <div>
-            <StyledLoginError>Wrong username and/or password</StyledLoginError>
-          </div>
-        )}
-        {error === 'notLoggedIn' && (
-          <div>
-            <StyledLoginError>Log in to continue</StyledLoginError>
+            <StyledLoginError>{errorMessage}</StyledLoginError>
           </div>
         )}
         <div>
