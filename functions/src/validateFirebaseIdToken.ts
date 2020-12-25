@@ -1,10 +1,11 @@
+import * as functions from 'firebase-functions';
 import * as express from 'express';
 
 // Express middleware that validates Firebase ID Tokens passed in the Authorization HTTP header.
 // The Firebase ID token needs to be passed as a Bearer token in the Authorization HTTP header like this:
 // `Authorization: Bearer <Firebase ID Token>`.
 // when decoded successfully, the ID Token content will be added as `req.user`.
-const validateFirebaseIdToken =  (functions: any) => (async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const validateFirebaseIdToken = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log('Check if request is authorized with Firebase ID token');
 
   if (
@@ -15,7 +16,7 @@ const validateFirebaseIdToken =  (functions: any) => (async (req: express.Reques
       'No Firebase ID token was passed as a Bearer token in the Authorization header.',
       'Make sure you authorize your request by providing the following HTTP header:',
       'Authorization: Bearer <Firebase ID Token>',
-      'or by passing a "__session" cookie.',
+      'or by passing a "__session" cookie.'
     );
     res.status(403).send('Unauthorized');
     return;
@@ -47,6 +48,6 @@ const validateFirebaseIdToken =  (functions: any) => (async (req: express.Reques
     res.status(403).send('Unauthorized');
     return;
   }
-});
+};
 
 export default validateFirebaseIdToken;

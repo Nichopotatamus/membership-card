@@ -23,7 +23,7 @@ const app = express();
 app.use(cors({ origin: true }));
 app.use(bodyParser.json());
 
-app.put('/subscriptions/:club', validateFirebaseIdToken(functions), async (req, res) => {
+app.put('/subscriptions/:club', validateFirebaseIdToken, async (req, res) => {
   const club = req.params.club;
   const bodyValidationError = validateSubscriptionsBody(req.body);
   if (bodyValidationError) {
@@ -117,7 +117,7 @@ app.post('/signup', async (req, res) => {
   res.send({ message: 'Success!' });
 });
 
-app.post('/link', validateFirebaseIdToken(functions), async (req, res) => {
+app.post('/link', validateFirebaseIdToken, async (req, res) => {
   // TODO: Clean up and type better.
   const uid: string = res.locals.user.uid;
   const { token } = req.body;

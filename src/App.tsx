@@ -26,8 +26,8 @@ const GlobalStyle = createGlobalStyle`
   #root { // https://stackoverflow.com/questions/1719452/how-to-make-a-div-always-full-screen
     display: flex;
     flex-direction: column;
-    width: ${window.innerWidth}px;
-    height: ${window.innerHeight}px;
+    width: 100vw;
+    height: 100vh;
   }
 `;
 
