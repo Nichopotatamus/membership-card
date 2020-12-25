@@ -5,11 +5,10 @@ import * as functions from 'firebase-functions';
 import * as qrcode from 'qrcode';
 import * as jwt from 'jsonwebtoken';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
+import { fromBase64, errorResponse, getRealOrFakeEmail, getUsername, validateSubscriptionsBody } from './utils';
 
 const region = 'europe-west3';
 const db = functions.app.admin.firestore();
-// Start writing Firebase Functions
-// https://firebase.google.com/docs/functions/typescript
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -23,63 +22,96 @@ app.get('/cards', async (req, res) => {
     .then((querySnapshot) => res.send(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))));
 });
 
-type Subscription = { alias: string; memberId: string; expiry: string; email: string; club: string };
+type Subscription = {
+  alias: string;
+  memberId: string;
+  expiry: string;
+  club: string;
+};
 app.put('/subscriptions/:club', async (req, res) => {
   const club = req.params.club;
-  const subscriptions: Subscription[] = req.body.map((entry: Omit<Subscription, 'club'>) => ({ ...entry, club }));
-  await Promise.all(
-    subscriptions.map((subscription) => {
-      const subscriptionId = `${club}-${subscription.memberId}`;
-      const { email, ...subscriptionWithoutEmail } = subscription;
-      return db
-        .collection('subscriptions')
-        .doc(subscriptionId)
-        .set(subscriptionWithoutEmail)
-        .then(async () => {
-          const userRecord = await db
-            .collection('users')
-            .where(`memberIds.${subscription.club}`, '==', `${subscription.memberId}`)
-            .get()
-            .then((querySnapshot) => {
-              if (querySnapshot.size === 1) {
-                const data = querySnapshot.docs[0].data() as {
-                  username: string;
-                  memberIds: { [club: string]: string };
-                };
-                return { uid: querySnapshot.docs[0].id, ...data };
-              }
-              return;
-            });
-          const existingUser = await functions.app.admin
-            .auth()
-            .getUser(userRecord?.uid || '')
-            .catch(() => undefined);
-          if (existingUser) {
-            await createCard(existingUser.uid, subscription);
-          } else {
-            const token = jwt.sign(
-              { club: subscription.club, memberId: subscription.memberId },
-              fromBase64(functions.config().createcard.privatekey),
-              { algorithm: 'RS256' }
-            );
-            // Send this link in an e-mail
-            functions.logger.log(
-              'User created:',
-              subscription.alias,
-              `${functions.config().client.host}/signup?token=${token}&email=${subscription.email}`
-            );
-          }
-        });
+  const bodyValidationError = validateSubscriptionsBody(req.body);
+  if (bodyValidationError) {
+    res.status(400).send(bodyValidationError);
+    return;
+  }
+  const entries = (req.body as {
+    alias: string;
+    memberId: string;
+    expiry: string;
+    email: string;
+    sendSignUpEmail?: boolean;
+  }[]).map((entry) => {
+    const { email, sendSignUpEmail = false, ...rest } = entry;
+    const subscription: Subscription = { ...rest, club };
+    const subscriptionId = `${club}-${subscription.memberId}`;
+    return { subscriptionId, subscription, email, sendSignUpEmail };
+  });
+  const results = await Promise.all(
+    entries.map(async ({ subscriptionId, subscription, email, sendSignUpEmail }) => {
+      try {
+        let emailSent = false;
+        let cardCreated = false;
+        let signUpLink: string | null = null;
+        const subscriptionUpdated = await db
+          .collection('subscriptions')
+          .doc(subscriptionId)
+          .get()
+          .then((doc) => doc.exists);
+        await db.collection('subscriptions').doc(subscriptionId).set(subscription);
+        const existingUser = await getExistingUser(subscription.memberId, subscription.club);
+        if (existingUser) {
+          await createCard(existingUser.uid, subscription);
+          cardCreated = true;
+        } else {
+          const token = jwt.sign(
+            { club: subscription.club, memberId: subscription.memberId },
+            fromBase64(functions.config().createcard.privatekey),
+            { algorithm: 'RS256' }
+          );
+          // Send this link in an e-mail
+          signUpLink = `${functions.config().client.host}/signup?token=${token}&email=${email}`;
+          const shouldSendEmail = !subscriptionUpdated || sendSignUpEmail;
+          emailSent = shouldSendEmail; // Change to result of send email function
+        }
+        return {
+          status: 'success',
+          subscriptionUpdated,
+          existingUser: existingUser ? getUsername(existingUser.email || '') : false,
+          cardCreated,
+          sendSignUpEmail,
+          signUpLink,
+          emailSent,
+          email,
+          subscription,
+        };
+      } catch (error) {
+        functions.logger.error(error);
+        return {
+          status: 'error',
+          errorCode: error.code || 'unknown',
+          errorMessage: error.message || 'No message',
+          email,
+          subscription,
+        };
+      }
     })
-  )
-    .then(async () => {
-      return res.send('Successfully!');
-    })
-    .catch((error) => {
-      functions.logger.log('Bork: ', error);
-      return res.send('Something borked');
-    });
+  );
+  res.send(results);
 });
+
+const getExistingUser = async (memberId: string, club: string) => {
+  const uid = await db
+    .collection('users')
+    .where(`memberIds.${club}`, '==', `${memberId}`)
+    .get()
+    .then((querySnapshot) => (querySnapshot.size === 1 ? querySnapshot.docs[0].id : undefined));
+  const existingUser = await functions.app.admin
+    .auth()
+    .getUser(uid || '')
+    .catch(() => undefined);
+  return existingUser;
+};
 
 export const api = functions.region(region).https.onRequest(app);
 
@@ -99,11 +131,8 @@ const createCard = async (uid: string, subscription: Subscription) => {
     uid,
     qr,
   };
-  await db.collection('cards').doc(cardId).set(card);
+  return await db.collection('cards').doc(cardId).set(card);
 };
-
-const getRealOrFakeEmail = (username: string) =>
-  username.match(/^\S+@\S+$/) ? username : `${username}@skog-og-mark.kink.no`;
 
 export const signup = functions.region(region).https.onRequest(async (request, response) =>
   cors({ origin: true })(request, response, async () => {
@@ -116,7 +145,7 @@ export const signup = functions.region(region).https.onRequest(async (request, r
     try {
       jwt.verify(token, fromBase64(functions.config().createcard.publickey), { algorithms: ['RS256'] });
     } catch {
-      response.sendStatus(400);
+      response.status(400).send(errorResponse('signup/invalid-token', 'The provided token is not valid.'));
       return;
     }
     const existingUser = await functions.app.admin
@@ -124,7 +153,13 @@ export const signup = functions.region(region).https.onRequest(async (request, r
       .getUserByEmail(realOrFakeEmail)
       .catch(() => undefined);
     if (existingUser) {
-      response.sendStatus(409);
+      response
+        .status(409)
+        .send(
+          username === realOrFakeEmail
+            ? errorResponse('signup/email-already-in-use', 'The email address is already in use by another account.')
+            : errorResponse('signup/username-already-in-use', 'The username is already in use by another account.')
+        );
       return;
     }
     const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
@@ -146,7 +181,7 @@ export const signup = functions.region(region).https.onRequest(async (request, r
             .map((subscription) => createCard(newUser.uid, subscription))
         );
       });
-    response.send('Success!');
+    response.send({ message: 'Success!' });
   })
 );
 
@@ -161,7 +196,3 @@ export const onDeleteUser = functions
       .catch(() => undefined);
     return user;
   });
-
-const fromBase64 = (input: string) => {
-  return Buffer.from(input, 'base64').toString('utf8');
-};
