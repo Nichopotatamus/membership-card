@@ -9,9 +9,10 @@ import Menu from './Menu';
 import { AppContextProvider, AppContext } from './AppContext';
 import QrReader from './QrReader';
 import Login from './Login';
-import CacheBuster from "./CacheBuster";
-import AuthState from "./AuthState";
-import SignUp from "./SignUp";
+import CacheBuster from './CacheBuster';
+import AuthState from './AuthState';
+import SignUp from './SignUp';
+import firebase from 'firebase/app';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -57,6 +58,17 @@ const App = () => (
               <Route exact path={'/qr-reader'} component={QrReader} />
               <Route exact path={'/login'} component={Login} />
               <Route exact path={'/signup'} component={SignUp} />
+              <Route
+                exact
+                path={'/logout'}
+                render={() => {
+                  firebase
+                    .auth()
+                    .signOut()
+                    .catch(() => window.location.reload());
+                  return <Redirect to="/login" />;
+                }}
+              />
             </Switch>
           )
         }

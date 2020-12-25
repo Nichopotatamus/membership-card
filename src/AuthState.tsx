@@ -1,26 +1,32 @@
-import React, {useEffect} from 'react';
+import React, { useEffect, useRef } from 'react';
 import firebase from 'firebase/app';
-import { useHistory } from 'react-router-dom';
-import {useAppContextValue} from "./AppContext";
-
+import { useHistory, matchPath } from 'react-router-dom';
+import { useAppContextValue } from './AppContext';
 
 const AuthState: React.FC = () => {
   const history = useHistory();
-  const {setUser} = useAppContextValue();
+  const { setUser } = useAppContextValue();
+  const didMountRef = useRef(false);
   useEffect(() => {
     const stopListener = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         // User is signed in.
         setUser(user);
-        history.push('/')
       } else {
         setUser(null);
-        //history.push('/login')
+        if (
+          didMountRef.current &&
+          (matchPath(history.location.pathname, { path: '/cards/:cardId' }) ||
+            matchPath(history.location.pathname, { path: '/', exact: true }))
+        ) {
+          history.push('/login');
+        }
       }
     });
+    didMountRef.current = true;
     return () => stopListener();
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setUser, history]);
   return null;
-}
+};
 
 export default AuthState;

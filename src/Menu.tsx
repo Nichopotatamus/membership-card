@@ -71,13 +71,11 @@ const Menu: React.FC<Props> = () => {
         {user ? (
           <StyledLink
             to={'/logout'}
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               firebase
                 .auth()
                 .signOut()
-                .then(() => {
-                  window.location.reload();
-                })
                 .catch(() => window.location.reload());
             }}>
             Logg ut

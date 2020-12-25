@@ -143,7 +143,7 @@ const QrReader: React.FC<Props> = () => {
       }
       return () => (active = false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <StyledQrReader>

@@ -77,10 +77,10 @@ const StyledFieldContainer = styled.div`
 `;
 
 const SignUp = () => {
-  const { location } = useHistory();
+  const history = useHistory();
   const { email, token } = useMemo(() => {
-    return qs.parse(location.search, { ignoreQueryPrefix: true, }) as {[key: string]: string};
-  }, [location.search]);
+    return qs.parse(history.location.search, { ignoreQueryPrefix: true }) as { [key: string]: string };
+  }, [history.location.search]);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
@@ -124,7 +124,10 @@ const SignUp = () => {
                   body: JSON.stringify({ username, password, token }),
                   headers: { 'content-type': 'application/json' },
                 });
-                await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
+                await firebase
+                  .auth()
+                  .signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
+                  .then(() => history.push('/'));
               }
             }}
             text="Registrer"

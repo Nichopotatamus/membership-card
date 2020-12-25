@@ -4,6 +4,7 @@ import Button from './Button';
 import { gray1, gray3, kinkRed } from './stylingVariables';
 import firebase from 'firebase/app';
 import getRealOrFakeEmail from './getRealOrFakeEmail';
+import { useHistory } from 'react-router-dom';
 
 const StyledLogin = styled.div`
   flex: 1;
@@ -75,6 +76,7 @@ const StyledFieldContainer = styled.div`
 `;
 
 const Login = () => {
+  const history = useHistory();
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const error = [''][0];
@@ -84,7 +86,10 @@ const Login = () => {
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
     if (username && password) {
-      await firebase.auth().signInWithEmailAndPassword(getRealOrFakeEmail(username), password);
+      await firebase
+        .auth()
+        .signInWithEmailAndPassword(getRealOrFakeEmail(username), password)
+        .then(() => history.push('/'));
     }
   };
 
@@ -112,7 +117,7 @@ const Login = () => {
         )}
         <div>
           <Button onClick={onSubmit} text="Logg inn" />
-          <button style={{display: 'none'}} type="submit" onClick={onSubmit} />
+          <button style={{ display: 'none' }} type="submit" onClick={onSubmit} />
         </div>
       </StyledForm>
     </StyledLogin>
