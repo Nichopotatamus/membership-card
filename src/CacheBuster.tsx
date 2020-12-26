@@ -8,7 +8,10 @@ const CacheBuster: React.FC = () => {
       fetch(`/meta.json?_=${new Date().getTime()}`)
         .then((response) => response.json())
         .then(async (meta) => {
-          if (meta.version !== version) {
+          if (
+            (process.env.REACT_APP_BUILD_TIMESTAMP && process.env.REACT_APP_BUILD_TIMESTAMP !== meta.buildTimestamp) ||
+            meta.version !== version
+          ) {
             if (caches) {
               // Service worker cache should be cleared with caches.delete()
               await caches.keys().then((names) => Promise.all(names.map((name) => caches.delete(name))));

@@ -1,10 +1,16 @@
 const fs = require('fs');
 const { version } = require('./package.json');
 
-fs.writeFile('./public/meta.json', JSON.stringify({ version }), 'utf8', (error) => {
+const meta = process.env.REACT_APP_BUILD_TIMESTAMP
+  ? { version, buildTimestamp: process.env.REACT_APP_BUILD_TIMESTAMP }
+  : { version };
+
+fs.writeFile('./public/meta.json', JSON.stringify(meta), 'utf8', (error) => {
   if (error) {
     console.log('An error occurred while writing JSON Object to meta.json.');
     throw error;
   }
-  console.log('meta.json file has been saved with latest version number.');
+  process.env.REACT_APP_BUILD_TIMESTAMP
+    ? console.log('meta.json file has been saved with latest version number and build timestamp.')
+    : console.log('meta.json file has been saved with latest version number.');
 });
