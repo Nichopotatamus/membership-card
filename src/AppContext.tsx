@@ -1,15 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext as AppContextType, Data } from './types';
 import { useLocation } from 'react-router-dom';
-import firebase from "firebase/app";
-
-const getSyncTimestamp = () => {
-  if (localStorage['syncTimestamp']) {
-    try {
-      return new Date(localStorage['syncTimestamp']);
-    } catch {}
-  }
-};
+import firebase from 'firebase/app';
 
 export const AppContext = React.createContext<AppContextType>({
   user: null,
@@ -26,12 +18,12 @@ export const AppContextProvider: React.FC = ({ children }) => {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [isMenuActive, setIsMenuActive] = useState(false);
-  const [data, setData] = useState<Data>({ syncTimestamp: getSyncTimestamp() });
+  const [data, setData] = useState<Data>({});
   const location = useLocation();
 
   useEffect(() => {
-    isMenuActive && setIsMenuActive(false);
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+    setIsMenuActive(false);
+  }, [location]);
 
   return (
     <AppContext.Provider

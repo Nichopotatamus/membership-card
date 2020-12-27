@@ -34,9 +34,7 @@ export const linkSubscriptions = async (uid: string, memberId: string, club: str
     .get()
     .then(async (querySnapshot) => {
       await Promise.all(
-        querySnapshot.docs
-          .map((doc) => doc.data() as Subscription)
-          .map((subscription) => createCard(uid, subscription))
+        querySnapshot.docs.map((doc) => doc.data() as Subscription).map((subscription) => createCard(uid, subscription))
       );
     });
 };
@@ -142,11 +140,10 @@ export const parseSubscriptionsBody = (
     sendSignUpEmail?: boolean;
   }[],
   club: string
-) => {
-  return input.map((entry) => {
+) =>
+  input.map((entry) => {
     const { email, sendSignUpEmail, ...rest } = entry;
     const subscription: Subscription = { ...rest, club };
     const subscriptionId = `${club}-${subscription.memberId}`;
     return { subscriptionId, subscription, email, sendSignUpEmail };
   });
-};

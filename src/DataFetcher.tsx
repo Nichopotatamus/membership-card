@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useAppContextValue } from './AppContext';
-import firebase from 'firebase/app';
 import { Card } from './types';
 import useInterval from './useInterval';
 
@@ -15,22 +14,20 @@ const DataFetcher: React.FC = () => {
     }
     (async function fetchData() {
       setIsFetchingData(true);
-      const db = firebase.firestore();
-      const { fromCache, cards } = await db
-        .collection('cards')
-        .where('uid', '==', user.uid)
-        .get()
-        .then((querySnapshot) => ({
-          fromCache: querySnapshot.metadata.fromCache,
-          cards: querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Card[],
-        }));
-      setData((previousData) => {
-        const syncTimestamp = fromCache ? previousData.syncTimestamp : new Date();
-        if (syncTimestamp) {
-          localStorage['syncTimestamp'] = syncTimestamp;
-        }
-        return { syncTimestamp, cards };
-      });
+      const { cards, syncTimestamp } = await fetch(`${process.env.REACT_APP_CLOUD_FUNCTIONS_HOST}/api/cards`, {
+        headers: {
+          authorization: `Bearer ${await user.getIdToken(true).catch((error) => {
+            // If network is down, just eat the exception and let fetch continue, and hopefully retrieve the cards from cache.
+            if (error.code !== 'auth/network-request-failed') {
+              throw Error;
+            }
+          })}`,
+        },
+      }).then(async (response) => ({
+        syncTimestamp: new Date(response.headers.get('date')!),
+        cards: (await response.json()) as Card[],
+      }));
+      setData({ cards, syncTimestamp });
       setIsFetchingData(false);
     })();
   }, [user, counter, setData, setIsFetchingData]);

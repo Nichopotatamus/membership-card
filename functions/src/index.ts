@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import { firestore } from 'firebase-admin';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -22,6 +23,29 @@ const db = functions.app.admin.firestore();
 const app = express();
 app.use(cors({ origin: true }));
 app.use(bodyParser.json());
+
+app.get('/cards', validateFirebaseIdToken, async (req, res) => {
+  const uid: string = res.locals.user.uid;
+  res.header('Access-Control-Expose-Headers', 'Date');
+  const userData = await db
+    .collection('users')
+    .doc(uid)
+    .get()
+    .then((doc) => (doc.exists ? doc.data() : undefined));
+  if (userData) {
+    const cardIds = Object.keys(userData.memberIds).map(
+      (club: string) => `${club}-${userData.memberIds[club]}`
+    );
+    const cards = await db
+      .collection('cards')
+      .where(firestore.FieldPath.documentId(), 'in', cardIds)
+      .get()
+      .then((queryResult) => queryResult.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    res.send(cards);
+  } else {
+    res.send([]);
+  }
+});
 
 app.put('/subscriptions/:club', validateFirebaseIdToken, async (req, res) => {
   const club = req.params.club;
@@ -137,7 +161,7 @@ app.post('/link', validateFirebaseIdToken, async (req, res) => {
   }
   const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
   try {
-    const userDocument = await db
+    const userData = await db
       .collection('users')
       .doc(user.uid)
       .get()
@@ -146,8 +170,8 @@ app.post('/link', validateFirebaseIdToken, async (req, res) => {
       .collection('users')
       .doc(user.uid)
       .set({
-        ...userDocument,
-        memberIds: { ...userDocument!.memberIds, [club]: memberId },
+        ...userData,
+        memberIds: { ...userData!.memberIds, [club]: memberId },
       });
     await linkSubscriptions(user.uid, memberId, club);
     res.sendStatus(200);

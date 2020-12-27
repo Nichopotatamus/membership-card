@@ -6,7 +6,6 @@ import reportWebVitals from './reportWebVitals';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,27 +19,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-if (window.location.hostname === 'localhost') {
-  firebase.firestore().useEmulator('localhost', 8080);
-}
-
-firebase
-  .firestore()
-  .enablePersistence()
-  .catch((error) => {
-    if (error.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled
-      // in one tab at a a time.
-      // ...
-      console.error('Firestore enablePersistence: failed-precondition');
-    } else if (error.code === 'unimplemented') {
-      // The current browser does not support all of the
-      // features required to enable persistence
-      // ...
-      console.error('Firestore enablePersistence: unimplemented');
-    }
-  });
 
 ReactDOM.render(
   <React.StrictMode>
