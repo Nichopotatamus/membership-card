@@ -3,6 +3,7 @@ import validate from 'validate.js';
 import moment from 'moment';
 import qrcode from 'qrcode';
 import jwt from 'jsonwebtoken';
+import express from 'express';
 
 const db = functions.app.admin.firestore();
 
@@ -147,3 +148,24 @@ export const parseSubscriptionsBody = (
     const subscriptionId = `${club}-${subscription.memberId}`;
     return { subscriptionId, subscription, email, sendSignUpEmail };
   });
+
+export const wrap = (
+  fn: (req: express.Request, res: express.Response, next?: express.NextFunction) => Promise<any>
+) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  fn(req, res, next).catch(next);
+};
+
+export const defaultErrorHandler = async (
+  error: Error,
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  functions.logger.error(error, req);
+  if (res.headersSent) {
+    return next(error);
+  }
+  // TODO: Send message to admin
+  //res.status(500).send({code: 'api/unknown-error', message: 'An unknown error has occurred, the event has been logged and the admin alerted.'})
+  res.status(500).send({ code: 'unknown', message: 'An unknown error has occurred, the event has been logged.' });
+};
