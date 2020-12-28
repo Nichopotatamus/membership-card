@@ -68,7 +68,7 @@ app.put(
           let emailSent = false;
           let cardCreated = false;
           let signUpLink: string | null = null;
-          const subscriptionUpdated = await db
+          const subscriptionUpdated: boolean = await db
             .collection('subscriptions')
             .doc(subscriptionId)
             .get()
