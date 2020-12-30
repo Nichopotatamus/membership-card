@@ -1,18 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AppContext as AppContextType, Data } from './types';
+import { AppContext as AppContextType, Data } from '../types';
 import { useLocation } from 'react-router-dom';
 import firebase from 'firebase/app';
 
-export const AppContext = React.createContext<AppContextType>({
-  user: null,
-  setUser: () => {},
-  isFetchingData: false,
-  setIsFetchingData: () => {},
-  isMenuActive: false,
-  setIsMenuActive: () => {},
-  data: {},
-  setData: () => {},
-});
+// "undefined!" is a way to get around providing a default implementation of all setters,
+// since consumers will be inside the provider and will always get an AppContextType object.
+export const AppContext = React.createContext<AppContextType>(undefined!);
 
 export const AppContextProvider: React.FC = ({ children }) => {
   const [user, setUser] = useState<firebase.User | null>(null);

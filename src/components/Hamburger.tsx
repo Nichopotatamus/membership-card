@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import {kinkRed} from "./stylingVariables";
+import {kinkRed} from "../stylingVariables";
 
 type Props = {
   size: number;

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import messages from "./messages";
+import messages from "../messages";
 
 type Props = {
   status?: string;

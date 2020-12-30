@@ -1,9 +1,9 @@
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
 import Button from './Button';
-import { gray1, gray3, kinkRed } from './stylingVariables';
+import { gray1, gray3, kinkRed } from '../stylingVariables';
 import firebase from 'firebase/app';
-import getRealOrFakeEmail from './getRealOrFakeEmail';
+import getRealOrFakeEmail from '../getRealOrFakeEmail';
 import { useHistory } from 'react-router-dom';
 import qs from 'qs';
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { version } from '../package.json';
+import { version } from '../../package.json';
 const environment = process.env.NODE_ENV;
 const buildTimestamp = process.env.REACT_APP_BUILD_TIMESTAMP;
 

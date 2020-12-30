@@ -3,7 +3,7 @@ import firebase from 'firebase/app';
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
 import { useAppContextValue } from './AppContext';
-import getClubName from './getClubName';
+import getClubName from '../getClubName';
 
 type Props = {};
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import {MemberData} from "./types";
-import getClubName from "./getClubName";
+import {MemberData} from "../types";
+import getClubName from "../getClubName";
 
 type Props = {
   memberData: MemberData;

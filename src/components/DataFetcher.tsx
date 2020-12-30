@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAppContextValue } from './AppContext';
-import { Card } from './types';
-import useInterval from './useInterval';
+import { Card } from '../types';
+import useInterval from '../useInterval';
 
 const DataFetcher: React.FC = () => {
   const { setIsFetchingData, setData, user } = useAppContextValue();

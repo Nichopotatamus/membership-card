@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
 import jsQR from 'jsqr';
 import MemberInfo from './MemberInfo';
-import { MemberData, QrData } from './types';
+import { MemberData, QrData } from '../types';
 import Status from './Status';
 import { Point } from 'jsqr/dist/locator';
 import jwt from 'jsonwebtoken';
@@ -143,7 +143,7 @@ const QrReader: React.FC<Props> = () => {
       }
       return () => (active = false);
     }
-  }, []);
+  }, [canvasDimensions.height, canvasDimensions.width]);
 
   return (
     <StyledQrReader>
