@@ -4,15 +4,9 @@ import moment from 'moment';
 import qrcode from 'qrcode';
 import jwt from 'jsonwebtoken';
 import express from 'express';
+import { Subscription } from './types';
 
 const db = functions.app.admin.firestore();
-
-export type Subscription = {
-  alias: string;
-  memberId: string;
-  expiry: string;
-  club: string;
-};
 
 export const fromBase64 = (input: string) => Buffer.from(input, 'base64').toString('utf8');
 
@@ -42,7 +36,7 @@ export const linkSubscriptions = async (uid: string, memberId: string, club: str
 
 export const getExistingUser = async (memberId: string, club: string) => {
   const uid = await db
-    .collection('users')
+    .collection('userData')
     .where(`memberIds.${club}`, '==', `${memberId}`)
     .get()
     .then((querySnapshot) => (querySnapshot.size === 1 ? querySnapshot.docs[0].id : undefined));
@@ -69,7 +63,7 @@ export const createCard = async (uid: string, subscription: Subscription) => {
     uid,
     qr,
   };
-  return await db.collection('cards').doc(cardId).set(card);
+  return await db.collection('userData').doc(uid).collection('cards').doc(cardId).set(card);
 };
 
 validate.extend(validate.validators.datetime, {

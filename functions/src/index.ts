@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import { firestore } from 'firebase-admin';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -18,6 +17,7 @@ import {
   wrap,
   defaultErrorHandler,
 } from './utils';
+import { Card, UserData } from './types';
 
 const region = 'europe-west3';
 const db = functions.app.admin.firestore();
@@ -30,24 +30,16 @@ app.get(
   '/cards',
   validateFirebaseIdToken,
   wrap(async (req, res) => {
+    // TODO: For every new auth token, generate new QR and blacklist the old JWT token inside the previous.
     const uid: string = res.locals.user.uid;
-    res.header('Access-Control-Expose-Headers', 'Date');
-    const userData = await db
-      .collection('users')
+    const cards = await db
+      .collection('userData')
       .doc(uid)
+      .collection('cards')
       .get()
-      .then((doc) => (doc.exists ? doc.data() : undefined));
-    if (userData) {
-      const cardIds = Object.keys(userData.memberIds).map((club: string) => `${club}-${userData.memberIds[club]}`);
-      const cards = await db
-        .collection('cards')
-        .where(firestore.FieldPath.documentId(), 'in', cardIds)
-        .get()
-        .then((queryResult) => queryResult.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-      res.send(cards);
-    } else {
-      res.send([]);
-    }
+      .then((querySnapshot) => querySnapshot.docs.map((doc) => doc.data() as Card));
+    res.header('Access-Control-Expose-Headers', 'Date');
+    res.send(cards);
   })
 );
 
@@ -87,6 +79,7 @@ app.put(
             // Send this link in an e-mail
             signUpLink = `${functions.config().client.host}/signup?token=${token}&email=${email}`;
             const shouldSendEmail = !subscriptionUpdated || !!sendSignUpEmail;
+
             emailSent = shouldSendEmail; // TODO: Change to result of send email function
           }
           return {
@@ -144,7 +137,7 @@ app.post(
     const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
     const newUser = await functions.app.admin.auth().createUser({ email: realOrFakeEmail, password });
     await db
-      .collection('users')
+      .collection('userData')
       .doc(newUser.uid)
       .set({ username, memberIds: { [club]: memberId } });
     await linkSubscriptions(newUser.uid, memberId, club);
@@ -176,16 +169,19 @@ app.post(
     const { club, memberId } = jwt.decode(token) as { club: string; memberId: string };
     try {
       const userData = await db
-        .collection('users')
+        .collection('userData')
         .doc(user.uid)
         .get()
-        .then((doc) => doc.data());
+        .then((doc) => (doc.exists ? (doc.data() as UserData) : undefined));
       await db
-        .collection('users')
+        .collection('userData')
         .doc(user.uid)
         .set({
           ...userData,
-          memberIds: { ...userData!.memberIds, [club]: memberId },
+          memberIds: {
+            ...userData?.memberIds,
+            [club]: memberId,
+          },
         });
       await linkSubscriptions(user.uid, memberId, club);
       res.sendStatus(200);
@@ -203,16 +199,18 @@ export const onDeleteUser = functions
   .region(region)
   .auth.user()
   .onDelete(async (user) => {
-    // TODO: Clean up and make more resilient to errors.
+    // TODO: Log errors
     await db
-      .collection('users')
+      .collection('userData')
+      .doc(user.uid)
+      .collection('cards')
+      .get()
+      .then((querySnapshot) => Promise.all(querySnapshot.docs.map((doc) => doc.ref.delete())))
+      .catch(() => undefined);
+    await db
+      .collection('userData')
       .doc(user.uid)
       .delete()
       .catch(() => undefined);
-    await db
-      .collection('cards')
-      .where('uid', '==', user.uid)
-      .get()
-      .then((querySnapshot) => querySnapshot.forEach(async (doc) => await doc.ref.delete()));
     return user;
   });
