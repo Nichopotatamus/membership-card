@@ -1,9 +1,12 @@
 export type UserData = {
-  memberIds: { [key: string]: string };
+  memberIds: {
+    [key: string]: string;
+  };
   cards: Card[];
 };
 
 export type Card = {
+  id: string;
   uid: string;
   memberId: string;
   club: string;

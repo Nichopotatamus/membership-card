@@ -37,7 +37,7 @@ app.get(
       .doc(uid)
       .collection('cards')
       .get()
-      .then((querySnapshot) => querySnapshot.docs.map((doc) => doc.data() as Card));
+      .then((querySnapshot) => querySnapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data()) } as Card)));
     res.header('Access-Control-Expose-Headers', 'Date');
     res.send(cards);
   })
