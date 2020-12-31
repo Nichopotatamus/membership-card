@@ -16,15 +16,24 @@ const StyledCard = styled.div`
 `;
 
 const StyledQrImage = styled.img`
-  width: ${window.innerWidth}px;
-  height: ${window.innerWidth}px;
+  width: 100vw;
+  height: 100vw;
+`;
+
+const StyledNoCardMessage = styled.div`
+  flex: 1;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 24px;
+  padding: 10px;
 `;
 
 const Card: React.FC<Props> = ({ cardId }) => {
   const { data } = useAppContextValue();
   const card = data.cards?.find((card) => card.id === cardId);
   if (!card) {
-    return null;
+    return <StyledNoCardMessage>Inget medlemskort er valgt</StyledNoCardMessage>;
   }
   return (
     <StyledCard>

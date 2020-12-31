@@ -26,9 +26,9 @@ const StyledError = styled.div`
 `;
 
 const StyledCanvasWrapper = styled.div`
-  width: ${window.screen.width}px;
-  min-height: ${(window.screen.width * 3) / 4}px;
-  max-height: ${(window.screen.width * 5) / 6}px;
+  width: 100vw;
+  min-height: calc(100vw * 3 / 4);
+  max-height: calc(100vw * 5 / 6);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -36,9 +36,6 @@ const StyledCanvasWrapper = styled.div`
   justify-content: center;
   background-color: #333;
 `;
-
-let timeout: number;
-let active = false;
 
 const checkMember = (memberData: MemberData) => {
   const expiryDate = new Date(memberData.expiry);
@@ -50,6 +47,8 @@ const checkMember = (memberData: MemberData) => {
 };
 
 const QrReader: React.FC<Props> = () => {
+  const timeoutRef = useRef<number>();
+  const activeRef = useRef<boolean>(false);
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.screen.width,
@@ -60,11 +59,11 @@ const QrReader: React.FC<Props> = () => {
   const [hasGetUserMediaError, setHasGetUserMediaError] = useState(false);
 
   const setDisplay = (qrData: QrData, validSignature: boolean) => {
-    clearTimeout(timeout);
+    clearTimeout(timeoutRef.current);
     const status = validSignature ? checkMember(qrData) : { isValid: false, message: 'invalidSignature' };
     setMemberData(qrData);
     setStatus(status);
-    timeout = setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setMemberData(undefined);
       setStatus(undefined);
     }, 5000);
@@ -75,7 +74,7 @@ const QrReader: React.FC<Props> = () => {
       setHasGetUserMediaError(true);
       return;
     }
-    active = true;
+    activeRef.current = true;
     const video = document.createElement('video');
     const canvas = canvasElementRef.current!.getContext('2d')!;
 
@@ -138,10 +137,10 @@ const QrReader: React.FC<Props> = () => {
           }
         }
       }
-      if (active) {
+      if (activeRef.current) {
         requestAnimationFrame(tick);
       }
-      return () => (active = false);
+      return () => (activeRef.current = false);
     }
   }, [canvasDimensions.height, canvasDimensions.width]);
 
