@@ -52,6 +52,7 @@ const Spinner: React.FC = () => {
   const timeoutRef = useRef<number | undefined>();
   const { isLoggingIn, isFetchingData } = useAppContextValue();
   const isLoading = isLoggingIn || isFetchingData;
+
   useEffect(() => {
     if (isLoading) {
       timeoutRef.current = setTimeout(() => setIsVisible(true), 500);

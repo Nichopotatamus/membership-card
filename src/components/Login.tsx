@@ -121,17 +121,11 @@ const Login = () => {
         <h1>Logg inn</h1>
         <StyledFieldContainer>
           <StyledLabel>Brukernavn/e-post</StyledLabel>
-          <input
-            ref={usernameRef}
-            type="text"
-            placeholder="Brukernavn"
-            name="username"
-            defaultValue={'test@example.com'}
-          />
+          <input ref={usernameRef} type="text" placeholder="Brukernavn" name="username" />
         </StyledFieldContainer>
         <StyledFieldContainer>
           <StyledLabel>Passord</StyledLabel>
-          <input ref={passwordRef} type="password" placeholder="Passord" name="password" defaultValue={'123456'} />
+          <input ref={passwordRef} type="password" placeholder="Passord" name="password" />
         </StyledFieldContainer>
         {errorCode && (
           <div>
