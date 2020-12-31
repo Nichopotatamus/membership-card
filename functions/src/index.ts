@@ -4,6 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 import validateFirebaseIdToken from './validateFirebaseIdToken';
+import { Card, UserData } from './types';
+import { sendSignUpMail } from './emailUtils';
 import {
   fromBase64,
   errorResponse,
@@ -17,7 +19,6 @@ import {
   wrap,
   defaultErrorHandler,
 } from './utils';
-import { Card, UserData } from './types';
 
 const region = 'europe-west3';
 const db = functions.app.admin.firestore();
@@ -37,7 +38,7 @@ app.get(
       .doc(uid)
       .collection('cards')
       .get()
-      .then((querySnapshot) => querySnapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data()) } as Card)));
+      .then((querySnapshot) => querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Card)));
     res.header('Access-Control-Expose-Headers', 'Date');
     res.send(cards);
   })
@@ -80,7 +81,12 @@ app.put(
             signUpLink = `${functions.config().client.host}/signup?token=${token}&email=${email}`;
             const shouldSendEmail = !subscriptionUpdated || !!sendSignUpEmail;
 
-            emailSent = shouldSendEmail; // TODO: Change to result of send email function
+            if (shouldSendEmail) {
+              try {
+                await sendSignUpMail({ ...subscription, email, signUpLink });
+                emailSent = true;
+              } catch {}
+            }
           }
           return {
             status: 'success',

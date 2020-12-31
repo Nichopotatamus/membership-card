@@ -2,6 +2,7 @@ import React from 'react';
 import Hamburger from './Hamburger';
 import styled from 'styled-components/macro';
 import { useAppContextValue } from './AppContext';
+import Spinner from './Spinner';
 
 type Props = {};
 
@@ -21,6 +22,12 @@ const StyledHamburgerWrapper = styled.div`
   left: 0;
 `;
 
+const StyledSpinnerWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+`;
+
 const StyledNavbarTitle = styled.div`
   user-select: none;
   width: 100%;
@@ -38,6 +45,9 @@ const Navbar: React.FC<Props> = () => {
         <Hamburger size={60} active={isMenuActive} />
       </StyledHamburgerWrapper>
       <StyledNavbarTitle>Skog & Mark</StyledNavbarTitle>
+      <StyledSpinnerWrapper>
+        <Spinner />
+      </StyledSpinnerWrapper>
     </StyledNavbar>
   );
 };

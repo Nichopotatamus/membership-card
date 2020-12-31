@@ -29,6 +29,8 @@ export type AppContext = {
   setUser: React.Dispatch<React.SetStateAction<firebase.User | null>>;
   isFetchingData: boolean;
   setIsFetchingData: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoggingIn: boolean;
+  setIsLoggingIn: React.Dispatch<React.SetStateAction<boolean>>;
   isMenuActive: boolean;
   setIsMenuActive: React.Dispatch<React.SetStateAction<boolean>>;
   data: Data;

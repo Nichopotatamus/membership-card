@@ -1,4 +1,7 @@
 {
+  "sendgrid": {
+     "apikey": ""
+  },
   "client": {
     "host": "https://localhost:7700"
   },

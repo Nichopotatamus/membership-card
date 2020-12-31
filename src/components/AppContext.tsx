@@ -10,6 +10,7 @@ export const AppContext = React.createContext<AppContextType>(undefined!);
 export const AppContextProvider: React.FC = ({ children }) => {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [data, setData] = useState<Data>({});
   const location = useLocation();
@@ -25,6 +26,8 @@ export const AppContextProvider: React.FC = ({ children }) => {
         setUser,
         isFetchingData,
         setIsFetchingData,
+        isLoggingIn,
+        setIsLoggingIn,
         data,
         setData,
         isMenuActive,

@@ -5,6 +5,7 @@ import { gray1, gray3, kinkRed } from '../stylingVariables';
 import firebase from 'firebase/app';
 import getRealOrFakeEmail from '../getRealOrFakeEmail';
 import { Link, useHistory } from 'react-router-dom';
+import { useAppContextValue } from './AppContext';
 
 const StyledLogin = styled.div`
   flex: 1;
@@ -83,6 +84,7 @@ const StyledLink = styled(Link)`
 `;
 
 const Login = () => {
+  const { setIsLoggingIn } = useAppContextValue();
   const history = useHistory();
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -90,6 +92,7 @@ const Login = () => {
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setIsLoggingIn(true);
     setErrorCode(null);
     const username = usernameRef.current?.value!;
     const password = passwordRef.current?.value!;
@@ -101,10 +104,11 @@ const Login = () => {
         console.error(error);
         setErrorCode(error.code);
       });
+    setIsLoggingIn(false);
   };
 
   const errorMessage = useMemo(() => {
-    if (errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-email') {
+    if (['auth/wrong-password', 'auth/invalid-email', 'auth/user-not-found'].includes(errorCode || '')) {
       return 'Feil brukernavn/e-post og/eller passord';
     } else if (errorCode) {
       return 'En ukjent feil har oppstått, vennligst prøv på nytt';
@@ -117,11 +121,17 @@ const Login = () => {
         <h1>Logg inn</h1>
         <StyledFieldContainer>
           <StyledLabel>Brukernavn/e-post</StyledLabel>
-          <input ref={usernameRef} type="text" placeholder="Brukernavn" name="username" />
+          <input
+            ref={usernameRef}
+            type="text"
+            placeholder="Brukernavn"
+            name="username"
+            defaultValue={'test@example.com'}
+          />
         </StyledFieldContainer>
         <StyledFieldContainer>
           <StyledLabel>Passord</StyledLabel>
-          <input ref={passwordRef} type="password" placeholder="Passord" name="password" />
+          <input ref={passwordRef} type="password" placeholder="Passord" name="password" defaultValue={'123456'} />
         </StyledFieldContainer>
         {errorCode && (
           <div>
