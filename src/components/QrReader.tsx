@@ -140,7 +140,10 @@ const QrReader: React.FC<Props> = () => {
       if (activeRef.current) {
         requestAnimationFrame(tick);
       }
-      return () => (activeRef.current = false);
+      return () => {
+        clearTimeout(timeoutRef.current);
+        activeRef.current = false;
+      };
     }
   }, [canvasDimensions.height, canvasDimensions.width]);
 
