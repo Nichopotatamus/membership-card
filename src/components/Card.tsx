@@ -12,12 +12,12 @@ const StyledCard = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: scroll;
+  overflow: hidden;
 `;
 
 const StyledQrImage = styled.img`
-  width: 100vw;
-  height: 100vw;
+  width: 100%;
+  height: 100%;
 `;
 
 const StyledNoCardMessage = styled.div`
@@ -29,6 +29,20 @@ const StyledNoCardMessage = styled.div`
   padding: 10px;
 `;
 
+const StyledContainer = styled.div`
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 Aspect Ratio */
+`;
+
+const StyledImageContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+`;
+
 const Card: React.FC<Props> = ({ cardId }) => {
   const { data } = useAppContextValue();
   const card = data.cards?.find((card) => card.id === cardId);
@@ -37,7 +51,11 @@ const Card: React.FC<Props> = ({ cardId }) => {
   }
   return (
     <StyledCard>
-      <StyledQrImage src={card.qr} alt="QR code" />
+      <StyledContainer>
+        <StyledImageContainer>
+          <StyledQrImage src={card.qr} alt="QR code" />
+        </StyledImageContainer>
+      </StyledContainer>
       <MemberInfo memberData={card} />
     </StyledCard>
   );

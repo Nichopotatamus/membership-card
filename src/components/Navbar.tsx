@@ -14,6 +14,7 @@ const StyledNavbar = styled.div`
   color: white;
   align-items: center;
   border-bottom: 2px solid #222222;
+  position: relative;
 `;
 
 const StyledHamburgerWrapper = styled.div`
