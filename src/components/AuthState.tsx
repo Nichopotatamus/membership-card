@@ -5,7 +5,7 @@ import { useAppContextValue } from './AppContext';
 
 const AuthState: React.FC = () => {
   const history = useHistory();
-  const { setUser, setIsLoggingIn } = useAppContextValue();
+  const { setUser, setIsLoggingIn, setData } = useAppContextValue();
   const didMountRef = useRef(false);
   useEffect(() => {
     const stopListener = firebase.auth().onAuthStateChanged((user) => {
@@ -14,6 +14,7 @@ const AuthState: React.FC = () => {
         // User is signed in.
         setUser(user);
       } else {
+        setData({});
         setUser(null);
         if (
           didMountRef.current &&

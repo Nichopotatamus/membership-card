@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import messages from "../messages";
+import messages from '../messages';
 
 type Props = {
   status?: string;
@@ -18,6 +18,8 @@ const StyledStatus = styled.div<{ status?: string }>`
   font-size: 24px;
 `;
 
-const Status: React.FC<Props> = ({ status }) => <StyledStatus status={status}>{status ? messages[status] : 'Venter på kort'}</StyledStatus>;
+const Status: React.FC<Props> = ({ status }) => (
+  <StyledStatus status={status}>{status ? messages[status] : 'Venter på kort'}</StyledStatus>
+);
 
 export default Status;

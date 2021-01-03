@@ -35,6 +35,8 @@ export type AppContext = {
   setIsMenuActive: React.Dispatch<React.SetStateAction<boolean>>;
   data: Data;
   setData: React.Dispatch<React.SetStateAction<Data>>;
+  version: string;
+  setVersion: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export type Data = {

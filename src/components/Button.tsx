@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import {kinkRed, kinkRedDarker, kinkRedDarkest} from "../stylingVariables";
+import { kinkRed, kinkRedDarker, kinkRedDarkest } from '../stylingVariables';
 
 const style = `
   padding: 10px;

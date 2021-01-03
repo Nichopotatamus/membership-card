@@ -21,6 +21,7 @@ export const AppContextProvider: React.FC = ({ children }) => {
   );
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [data, setData] = useState<Data>({});
+  const [version, setVersion] = useState('');
   const location = useLocation();
 
   useEffect(() => {
@@ -42,6 +43,8 @@ export const AppContextProvider: React.FC = ({ children }) => {
         setIsLoggingIn,
         data,
         setData,
+        version,
+        setVersion,
         isMenuActive,
         setIsMenuActive,
       }}>

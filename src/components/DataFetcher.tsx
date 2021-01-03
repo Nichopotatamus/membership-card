@@ -7,7 +7,6 @@ const DataFetcher: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     if (!user) {
-      setData({});
       return;
     }
     setIsFetchingData(true);

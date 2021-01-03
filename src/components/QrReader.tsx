@@ -105,7 +105,7 @@ const QrReader: React.FC<Props> = () => {
     function tick() {
       if (canvasWrapperRef.current && canvasElementRef.current && video.readyState === video.HAVE_ENOUGH_DATA) {
         const ratio = video.videoHeight / video.videoWidth;
-        const canvasHeight = (canvasWrapperRef.current.clientWidth) * ratio;
+        const canvasHeight = canvasWrapperRef.current.clientWidth * ratio;
         const canvasWidth = canvasWrapperRef.current.clientWidth;
         setCanvasDimensions((prevState) => {
           if (prevState.width !== canvasWidth || prevState.height !== canvasHeight) {
@@ -114,7 +114,6 @@ const QrReader: React.FC<Props> = () => {
             return prevState;
           }
         });
-        console.log(canvasHeight, canvasWidth);
         canvas.drawImage(video, 0, 0, canvasElementRef.current.width, canvasElementRef.current.height);
         const imageData = canvas.getImageData(0, 0, canvasElementRef.current.width, canvasElementRef.current.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -146,8 +145,6 @@ const QrReader: React.FC<Props> = () => {
       }
       if (activeRef.current) {
         requestAnimationFrame(tick);
-      } else {
-        console.log('break out');
       }
     }
     return () => {

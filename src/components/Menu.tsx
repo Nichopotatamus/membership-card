@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import firebase from 'firebase/app';
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
@@ -46,7 +46,8 @@ const StyledLink = styled(Link)`
 `;
 
 const Menu: React.FC<Props> = () => {
-  const { user, data } = useAppContextValue();
+  const { user, data, version } = useAppContextValue();
+  const [displaySyncTimestamp, setDisplaySyncTimestamp] = useState(true);
 
   return (
     <StyledMenu>
@@ -86,13 +87,26 @@ const Menu: React.FC<Props> = () => {
         ) : (
           <StyledLink to={'/login'}>Logg inn</StyledLink>
         )}
-        <div>
-          <span>
-            <em>Sist synkronisert:</em>
-          </span>
-          <span>
-            <em>{data.syncTimestamp ? data.syncTimestamp.toLocaleString() : 'Aldri'}</em>
-          </span>
+        <div onClick={() => process.env.NODE_ENV === 'production' && setDisplaySyncTimestamp(!displaySyncTimestamp)}>
+          {displaySyncTimestamp ? (
+            <>
+              <span>
+                <em>Sist synkronisert:</em>
+              </span>
+              <span>
+                <em>{data.syncTimestamp ? data.syncTimestamp.toLocaleString() : 'Aldri'}</em>
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                <em>Versjon:</em>
+              </span>
+              <span>
+                <em>{version}</em>
+              </span>
+            </>
+          )}
         </div>
       </div>
     </StyledMenu>
