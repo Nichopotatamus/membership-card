@@ -27,7 +27,7 @@ const AuthState: React.FC = () => {
     });
     didMountRef.current = true;
     return () => stopListener();
-  }, [setUser, history]);
+  }, [setUser, history, setIsLoggingIn, setData]);
   return null;
 };
 

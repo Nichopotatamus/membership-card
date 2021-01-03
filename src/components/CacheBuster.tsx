@@ -23,7 +23,7 @@ const CacheBuster: React.FC = () => {
         })
         .catch(() => console.log('Fetching meta.json failed, continuing with currently cached version of app.'));
     }
-  }, []);
+  }, [setVersion]);
   return null;
 };
 
