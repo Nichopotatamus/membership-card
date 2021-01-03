@@ -7,7 +7,7 @@ const DataFetcher: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     if (!user) {
-      setData({ cards: [] });
+      setData({});
       return;
     }
     setIsFetchingData(true);

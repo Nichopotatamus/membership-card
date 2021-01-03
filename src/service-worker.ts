@@ -83,7 +83,7 @@ registerRoute(
   ({ url }) => url.pathname === '/api/cards',
   new NetworkFirst({
     cacheName: 'cards',
-    networkTimeoutSeconds: 5,
+    networkTimeoutSeconds: 30,
     plugins: [new CacheableResponsePlugin({})],
   })
 );

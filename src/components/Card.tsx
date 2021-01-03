@@ -20,7 +20,7 @@ const StyledQrImage = styled.img`
   height: 100%;
 `;
 
-const StyledNoCardMessage = styled.div`
+const StyledMessage = styled.div`
   flex: 1;
   display: grid;
   place-items: center;
@@ -44,10 +44,14 @@ const StyledImageContainer = styled.div`
 `;
 
 const Card: React.FC<Props> = ({ cardId }) => {
-  const { data } = useAppContextValue();
+  const { data, isFetchingData, isLoggingIn } = useAppContextValue();
   const card = data.cards?.find((card) => card.id === cardId);
-  if (!card) {
-    return <StyledNoCardMessage>Inget medlemskort er valgt</StyledNoCardMessage>;
+  if (!data.cards && isLoggingIn) {
+    return <StyledMessage>Laster bruker...</StyledMessage>;
+  } else if (!data.cards && isFetchingData) {
+    return <StyledMessage>Laster kort...</StyledMessage>;
+  } else if (!card) {
+    return <StyledMessage>Inget medlemskort er valgt</StyledMessage>;
   }
   return (
     <StyledCard>

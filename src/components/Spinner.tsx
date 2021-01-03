@@ -50,8 +50,8 @@ const StyledSpinner = styled.div`
 const Spinner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<number | undefined>();
-  const { isLoggingIn, isFetchingData } = useAppContextValue();
-  const isLoading = isLoggingIn || isFetchingData;
+  const { isLoggingIn, isFetchingData, user, data } = useAppContextValue();
+  const isLoading = isLoggingIn || isFetchingData || (user && !data.cards);
 
   useEffect(() => {
     if (isLoading) {

@@ -101,10 +101,9 @@ const App = () => (
                   exact
                   path={'/logout'}
                   render={() => {
-                    firebase
-                      .auth()
-                      .signOut()
-                      .catch(() => window.location.reload());
+                    Promise.all([caches?.delete('cards'), firebase.auth().signOut()]).catch(() =>
+                      window.location.reload()
+                    );
                     return <Redirect to="/login" />;
                   }}
                 />

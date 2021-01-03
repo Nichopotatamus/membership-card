@@ -38,6 +38,7 @@ const StyledCardChooser = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: white;
 `;
 
 const StyledLink = styled(Link)`
@@ -55,13 +56,18 @@ const Menu: React.FC<Props> = () => {
       {user ? (
         <StyledCardChooser>
           <section>
-            <strong>Velg kort:</strong>
+            <strong>Dine kort:</strong>
           </section>
           {data.cards?.map((card) => (
             <StyledLink key={card.id} to={`/cards/${card.id}`}>
               {getClubName(card.club)}
             </StyledLink>
           ))}
+          {!data.cards && (
+            <span>
+              <em>Du har ingen kort</em>
+            </span>
+          )}
         </StyledCardChooser>
       ) : (
         <div />
@@ -73,10 +79,7 @@ const Menu: React.FC<Props> = () => {
             to={'/logout'}
             onClick={(event) => {
               event.stopPropagation();
-              firebase
-                .auth()
-                .signOut()
-                .catch(() => window.location.reload());
+              Promise.all([caches?.delete('cards'), firebase.auth().signOut()]).catch(() => window.location.reload());
             }}>
             Logg ut
           </StyledLink>
