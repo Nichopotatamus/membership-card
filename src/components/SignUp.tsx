@@ -1,82 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
-import styled from 'styled-components/macro';
 import Button from './Button';
-import { gray1, gray3, kinkRed } from '../stylingVariables';
 import firebase from 'firebase/app';
 import getRealOrFakeEmail from '../getRealOrFakeEmail';
 import { useHistory } from 'react-router-dom';
 import qs from 'qs';
+import * as S from '../styles';
 
-const StyledSignUp = styled.div`
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  input::placeholder {
-    color: ${gray1};
-  }
-
-  input {
-    border: 2px solid ${gray3};
-    border-radius: 0;
-    color: white;
-    background-color: ${gray3};
-    font-size: 15px;
-    height: 40px;
-    padding-left: 8px;
-  }
-
-  input:nth-child(2) {
-    margin-bottom: 5px;
-  }
-
-  input:nth-child(3) {
-    margin-bottom: 16px;
-  }
-
-  input:focus {
-    border: 2px solid ${kinkRed};
-    outline: none;
-  }
-
-  h1 {
-    color: ${kinkRed};
-    font-size: 2em;
-    margin-bottom: 16px;
-  }
-
-  a {
-    display: inline-block;
-  }
-`;
-
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-`;
-
-const StyledLabel = styled.label`
-  color: white;
-  width: 100%;
-  margin-bottom: 5px;
-`;
-
-const StyledSignUpError = styled.p`
-  color: red;
-  margin-bottom: 5px;
-`;
-
-const StyledFieldContainer = styled.div`
-  width: 80%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SignUp = () => {
+const SignUp: React.FC = () => {
   const history = useHistory();
   const { email, token } = useMemo(
     () => qs.parse(history.location.search, { ignoreQueryPrefix: true }) as { [key: string]: string },
@@ -137,32 +67,32 @@ const SignUp = () => {
   }, [errorCode]);
 
   return (
-    <StyledSignUp>
-      <StyledForm onSubmit={onSubmit}>
+    <S.SignUp>
+      <S.Form onSubmit={onSubmit}>
         <h1>Registrer ny bruker</h1>
-        <StyledFieldContainer>
-          <StyledLabel>Brukernavn</StyledLabel>
+        <S.FieldContainer>
+          <S.Label>Brukernavn</S.Label>
           <input ref={usernameRef} defaultValue={email} type="text" placeholder="Brukernavn" name="username" />
-        </StyledFieldContainer>
-        <StyledFieldContainer>
-          <StyledLabel>Passord</StyledLabel>
+        </S.FieldContainer>
+        <S.FieldContainer>
+          <S.Label>Passord</S.Label>
           <input ref={passwordRef} type="password" placeholder="Passord" name="password" />
-        </StyledFieldContainer>
-        <StyledFieldContainer>
-          <StyledLabel>Bekreft passord</StyledLabel>
+        </S.FieldContainer>
+        <S.FieldContainer>
+          <S.Label>Bekreft passord</S.Label>
           <input ref={confirmPasswordRef} type="password" placeholder="Bekreft passord" name="confirm-password" />
-        </StyledFieldContainer>
+        </S.FieldContainer>
         {errorCode && (
           <div>
-            <StyledSignUpError>{errorMessage}</StyledSignUpError>
+            <S.FormError>{errorMessage}</S.FormError>
           </div>
         )}
         <div>
           <Button onClick={onSubmit} text="Registrer" />
           <button style={{ display: 'none' }} type="submit" onClick={onSubmit} />
         </div>
-      </StyledForm>
-    </StyledSignUp>
+      </S.Form>
+    </S.SignUp>
   );
 };
 

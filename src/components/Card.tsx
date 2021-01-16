@@ -1,67 +1,31 @@
 import React from 'react';
-import styled from 'styled-components/macro';
 import MemberInfo from './MemberInfo';
 import { useAppContextValue } from './AppContext';
+import * as S from '../styles';
 
 type Props = {
   cardId: string;
 };
 
-const StyledCard = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const StyledQrImage = styled.img`
-  width: 100%;
-  height: 100%;
-`;
-
-const StyledMessage = styled.div`
-  flex: 1;
-  display: grid;
-  place-items: center;
-  color: white;
-  font-size: 24px;
-  padding: 10px;
-`;
-
-const StyledContainer = styled.div`
-  position: relative;
-  width: 100%;
-  padding-top: 100%; /* 1:1 Aspect Ratio */
-`;
-
-const StyledImageContainer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-`;
-
 const Card: React.FC<Props> = ({ cardId }) => {
   const { data, isFetchingData, isLoggingIn } = useAppContextValue();
   const card = data.cards?.find((card) => card.id === cardId);
   if (!data.cards && isLoggingIn) {
-    return <StyledMessage>Laster bruker...</StyledMessage>;
+    return <S.Message>Laster bruker...</S.Message>;
   } else if (!data.cards && isFetchingData) {
-    return <StyledMessage>Laster kort...</StyledMessage>;
+    return <S.Message>Laster kort...</S.Message>;
   } else if (!card) {
-    return <StyledMessage>Inget medlemskort er valgt</StyledMessage>;
+    return <S.Message>Inget medlemskort er valgt</S.Message>;
   }
   return (
-    <StyledCard>
-      <StyledContainer>
-        <StyledImageContainer>
-          <StyledQrImage src={card.qr} alt="QR code" />
-        </StyledImageContainer>
-      </StyledContainer>
+    <S.Card>
+      <S.Container>
+        <S.ImageContainer>
+          <S.QrImage src={card.qr} alt="QR code" />
+        </S.ImageContainer>
+      </S.Container>
       <MemberInfo memberData={card} />
-    </StyledCard>
+    </S.Card>
   );
 };
 

@@ -1,77 +1,25 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import Navbar from './Navbar';
 import Card from './Card';
 import DataFetcher from './DataFetcher';
-
-import { createGlobalStyle } from 'styled-components/macro';
 import Menu from './Menu';
-import { AppContextProvider, AppContext } from './AppContext';
+import { AppContext, AppContextProvider } from './AppContext';
 import QrReader from './QrReader';
 import Login from './Login';
 import CacheBuster from './CacheBuster';
 import AuthState from './AuthState';
 import SignUp from './SignUp';
 import firebase from 'firebase/app';
-import styled from 'styled-components';
-import { gray1 } from '../stylingVariables';
+import * as S from '../styles';
 
-const GlobalStyle = createGlobalStyle`
-  html {
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-  }
-  body {
-    margin: 0;
-    overflow: auto;
-    background-color: black;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    width: 100%;
-    height: 100%;
-  }
-  #root {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const StyledWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  max-width: 500px;
-  max-height: 900px;
-  @media (min-width: 502px) {
-    border-left: 1px solid ${gray1};
-    border-right: 1px solid ${gray1};
-  }
-  @media (min-width: 504px) {
-    border-left: 2px solid ${gray1};
-    border-right: 2px solid ${gray1};
-  }
-  @media (min-height: 902px) {
-    border-top: 1px solid ${gray1};
-    border-bottom: 1px solid ${gray1};
-  }
-  @media (min-height: 904px) {
-    border-top: 2px solid ${gray1};
-    border-bottom: 2px solid ${gray1};
-  }
-`;
-
-const App = () => (
-  <StyledWrapper>
+const App: React.FC = () => (
+  <S.Wrapper>
     <BrowserRouter>
       <AppContextProvider>
         <AuthState />
         <CacheBuster />
-        <GlobalStyle />
+        <S.GlobalStyle />
         <DataFetcher />
         <Navbar />
         <AppContext.Consumer>
@@ -113,7 +61,7 @@ const App = () => (
         </AppContext.Consumer>
       </AppContextProvider>
     </BrowserRouter>
-  </StyledWrapper>
+  </S.Wrapper>
 );
 
 export default App;

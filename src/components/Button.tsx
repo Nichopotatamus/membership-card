@@ -1,32 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
-import { kinkRed, kinkRedDarker, kinkRedDarkest } from '../stylingVariables';
-
-const style = `
-  padding: 10px;
-  color: white;
-  border: none;
-  background-color: ${kinkRed};
-  cursor: pointer;
-  text-decoration: none;
-
-  :hover {
-    background-color: ${kinkRedDarker};
-  }
-
-  :active {
-    background-color: ${kinkRedDarkest};
-  }
-`;
-
-const StyledLink = styled(Link)`
-  ${style}
-`;
-
-const StyledExternalLink = styled.a`
-  ${style}
-`;
+import * as S from '../styles';
 
 type Props = {
   url?: string;
@@ -36,13 +9,13 @@ type Props = {
 
 const Button: React.FC<Props> = ({ url, text, onClick }) =>
   url && url.startsWith('/') ? (
-    <StyledLink to={url} onClick={onClick}>
+    <S.Button to={url} onClick={onClick}>
       {text}
-    </StyledLink>
+    </S.Button>
   ) : (
-    <StyledExternalLink href={url} onClick={onClick}>
+    <S.ExternalLinkButton href={url} onClick={onClick}>
       {text}
-    </StyledExternalLink>
+    </S.ExternalLinkButton>
   );
 
 export default Button;

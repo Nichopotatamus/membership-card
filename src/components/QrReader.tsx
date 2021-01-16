@@ -1,43 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/macro';
 import jsQR from 'jsqr';
 import MemberInfo from './MemberInfo';
 import { MemberData, QrData } from '../types';
 import Status from './Status';
 import { Point } from 'jsqr/dist/locator';
 import jwt from 'jsonwebtoken';
-
-type Props = {};
-
-const StyledQrReader = styled.div`
-  width: 100%;
-  flex: 1;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const StyledError = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
-
-const StyledCanvasWrapper = styled.div<{ canvasWidth: number }>`
-  min-height: ${(props) => (props.canvasWidth * 3) / 4}px;
-  max-height: ${(props) => (props.canvasWidth * 5) / 6}px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #333;
-  margin: 0 -4px;
-`;
+import * as S from '../styles';
 
 const checkMember = (memberData: MemberData) => {
   const expiryDate = new Date(memberData.expiry);
@@ -48,7 +16,7 @@ const checkMember = (memberData: MemberData) => {
   return { isValid: true, message: 'isValid' };
 };
 
-const QrReader: React.FC<Props> = () => {
+const QrReader: React.FC = () => {
   const timeoutRef = useRef<number>();
   const activeRef = useRef<boolean>(false);
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
@@ -154,31 +122,31 @@ const QrReader: React.FC<Props> = () => {
   }, []);
 
   return (
-    <StyledQrReader ref={canvasWrapperRef}>
+    <S.QrReader ref={canvasWrapperRef}>
       {hasGetUserMediaError ? (
-        <StyledError>
+        <S.Error>
           <p>Kunne ikke starte kamera. Sjekk at du har gitt tilgang og at du kjører en støttet nettleser.</p>
           <p>Støttede nettlesere:</p>
           <ul>
             <li>Safari 11, eller nyere (iOS)</li>
             <li>Chrome 52, Firefox 36, Opera 41, eller nyere (Android)</li>
           </ul>
-        </StyledError>
+        </S.Error>
       ) : (
         <>
-          <StyledCanvasWrapper canvasWidth={canvasDimensions.width}>
+          <S.CanvasWrapper canvasWidth={canvasDimensions.width}>
             <canvas
               ref={canvasElementRef}
               id="canvas"
               height={canvasDimensions.height}
               width={canvasDimensions.width}
             />
-          </StyledCanvasWrapper>
+          </S.CanvasWrapper>
           <Status status={status?.message} />
           {memberData && <MemberInfo memberData={memberData} />}
         </>
       )}
-    </StyledQrReader>
+    </S.QrReader>
   );
 };
 

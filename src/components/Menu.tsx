@@ -1,91 +1,50 @@
 import React, { useState } from 'react';
 import firebase from 'firebase/app';
-import styled from 'styled-components/macro';
-import { Link } from 'react-router-dom';
 import { useAppContextValue } from './AppContext';
 import getClubName from '../getClubName';
+import * as S from '../styles';
 
-type Props = {};
-
-const StyledMenu = styled.div`
-  flex: 1;
-  background-color: black;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  & div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-  }
-  & div:nth-child(1) {
-    flex-grow: 1;
-  }
-  & div:nth-child(2) {
-    flex-grow: 3;
-  }
-  & div:nth-child(3) {
-    flex-grow: 1;
-  }
-`;
-
-const StyledCardChooser = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-`;
-
-const StyledLink = styled(Link)`
-  color: white;
-`;
-
-const Menu: React.FC<Props> = () => {
+const Menu: React.FC = () => {
   const { user, data, version } = useAppContextValue();
   const [displaySyncTimestamp, setDisplaySyncTimestamp] = useState(true);
 
   return (
-    <StyledMenu>
+    <S.Menu>
       <div>
-        <StyledLink to="/qr-reader">Les av QR-koder</StyledLink>
+        <S.MenuLink to="/qr-reader">Les av QR-koder</S.MenuLink>
       </div>
       {user ? (
-        <StyledCardChooser>
+        <S.CardChooser>
           <section>
             <strong>Dine kort:</strong>
           </section>
           {data.cards?.map((card) => (
-            <StyledLink key={card.id} to={`/cards/${card.id}`}>
+            <S.MenuLink key={card.id} to={`/cards/${card.id}`}>
               {getClubName(card.club)}
-            </StyledLink>
+            </S.MenuLink>
           ))}
           {!data.cards && (
             <span>
               <em>Du har ingen kort</em>
             </span>
           )}
-        </StyledCardChooser>
+        </S.CardChooser>
       ) : (
         <div />
       )}
 
       <div>
         {user ? (
-          <StyledLink
+          <S.MenuLink
             to={'/logout'}
             onClick={(event) => {
               event.stopPropagation();
               Promise.all([caches?.delete('cards'), firebase.auth().signOut()]).catch(() => window.location.reload());
             }}>
             Logg ut
-          </StyledLink>
+          </S.MenuLink>
         ) : (
-          <StyledLink to={'/login'}>Logg inn</StyledLink>
+          <S.MenuLink to={'/login'}>Logg inn</S.MenuLink>
         )}
         <div onClick={() => process.env.NODE_ENV === 'production' && setDisplaySyncTimestamp(!displaySyncTimestamp)}>
           {displaySyncTimestamp ? (
@@ -109,7 +68,7 @@ const Menu: React.FC<Props> = () => {
           )}
         </div>
       </div>
-    </StyledMenu>
+    </S.Menu>
   );
 };
 
